@@ -15,6 +15,7 @@
 
 			figure {
 				text-align: center;
+				margin: 20px 0;
 			}
 
 			img {
@@ -24,6 +25,7 @@
 
 			body {
 				font-family: 'Inter', sans-serif;
+				line-height: 1.6;
 			}
 
 			.image-grid {
@@ -35,38 +37,38 @@
 
 			.image-grid figure {
 				flex: 1;
-				min-width: 250px;
+				min-width: 300px;
 			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
 			<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-			<div style="text-align: center;">Names: Umesh Gopi</div>
+			<div style="text-align: center;">Name: Umesh Gopi</div>
 
 			<br>
 
-			Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-			
-			<br>
-
-			Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+			<div style="text-align: center;">
+				Link to webpage: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+				<br>
+				Link to GitHub repository: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+			</div>
 
 			<figure>
 				<img src="lion.jpg" alt="Lion" style="width:50%"/>
-				<figcaption>You can add images with captions!</figcaption>
+				<figcaption>Example lion image used in the project.</figcaption>
 			</figure>
 
 			<h2>Overview</h2>
-			Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+			<p>Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.</p>
 
 			<h2>Task 1: Drawing Single-Color Triangles</h2>
 			<p>To rasterize triangles we first want to find the bounding points of the triangles that we want to sample inside. To do this we get the maximum and minimum of both the x and y points for all 3 given points. After, we want to define the 3 Lines (L(x,y)) that actually make up the triangle so we can use the three Lines Test to properly rasterize our triangles. We can find L(x,y) = Ax + By + C and solve for A, B and C with some math from the points that have been given to us. Then we can iterate through all the points inside of our bounding points and see if the center of each pixel falls inside our triangle. If it does then we can color it in and if not we don’t.</p>
 			<p>It is no worse as we are pretty much doing the same type of sampling inside the bounding of the triangle.</p>
 
 			<figure>
-				<img src="screenshot_2-14_10-18-53.png" alt="Basic Test 4" />
-				<figcaption>Screenshot of basic/test4.svg with the default viewing parameters and the pixel inspector centered on an interesting part of the scene.</figcaption>
+				<img src="screenshot_2-14_10-18-53.png" alt="Task 1 Screenshot" />
+				<figcaption>Screenshot of basic/test4.svg showing the pixel inspector centered on an aliased edge.</figcaption>
 			</figure>
 
 			<h2>Task 2: Antialiasing by Supersampling</h2>
@@ -75,16 +77,16 @@
 
 			<div class="image-grid">
 				<figure>
-					<img src="screenshot_2-14_10-16-56.png" alt="Supersampling 1" />
-					<figcaption>Supersampling 1 sample per pixel.</figcaption>
+					<img src="screenshot_2-14_10-16-56.png" alt="1x Sampling" />
+					<figcaption>Sample rate: 1</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-14_10-17-9.png" alt="Supersampling 4" />
-					<figcaption>Supersampling 4 samples per pixel.</figcaption>
+					<img src="screenshot_2-14_10-17-9.png" alt="4x Sampling" />
+					<figcaption>Sample rate: 4</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-14_10-17-15.png" alt="Supersampling 16" />
-					<figcaption>Supersampling 16 samples per pixel.</figcaption>
+					<img src="screenshot_2-14_10-17-15.png" alt="16x Sampling" />
+					<figcaption>Sample rate: 16</figcaption>
 				</figure>
 			</div>
 
@@ -92,8 +94,8 @@
 			<p>In this image the robot will be waving his hand at the user while jumping.</p>
 
 			<figure>
-				<img src="screenshot_2-18_16-10-35.png" alt="Robot Waving" />
-				<figcaption>Updated version of robot.svg with cubeman waving.</figcaption>
+				<img src="screenshot_2-18_16-10-35.png" alt="Waving Robot" />
+				<figcaption>Modified robot.svg with the cubeman in a waving and jumping pose.</figcaption>
 			</figure>
 
 			<h2>Task 4: Barycentric coordinates</h2>
@@ -102,11 +104,11 @@
 			<div class="image-grid">
 				<figure>
 					<img src="screenshot_2-18_16-22-39.png" alt="Barycentric Triangle" />
-					<figcaption>Example of a triangle with color interpolation using barycentric coordinates.</figcaption>
+					<figcaption>Example of color interpolation in a single triangle.</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-18_16-24-25.png" alt="Basic Test 7" />
-					<figcaption>Screenshot of basic/test7.svg with default viewing parameters and sample rate 1.</figcaption>
+					<img src="screenshot_2-18_16-24-25.png" alt="Test 7 Color Wheel" />
+					<figcaption>Screenshot of basic/test7.svg with sample rate 1.</figcaption>
 				</figure>
 			</div>
 
@@ -115,21 +117,21 @@
 
 			<div class="image-grid">
 				<figure>
-					<img src="screenshot_2-18_17-15-6.png" alt="Nearest 1" />
+					<img src="screenshot_2-18_17-15-6.png" alt="Nearest 1x" />
 					<figcaption>Nearest sampling at 1 sample per pixel.</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-18_17-15-36.png" alt="Nearest 16" />
+					<img src="screenshot_2-18_17-15-36.png" alt="Nearest 16x" />
 					<figcaption>Nearest sampling at 16 samples per pixel.</figcaption>
 				</figure>
 			</div>
 			<div class="image-grid">
 				<figure>
-					<img src="screenshot_2-18_17-15-57.png" alt="Bilinear 1" />
+					<img src="screenshot_2-18_17-15-57.png" alt="Bilinear 1x" />
 					<figcaption>Bilinear sampling at 1 sample per pixel.</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-18_17-16-22.png" alt="Bilinear 16" />
+					<img src="screenshot_2-18_17-16-22.png" alt="Bilinear 16x" />
 					<figcaption>Bilinear sampling at 16 samples per pixel.</figcaption>
 				</figure>
 			</div>
@@ -137,6 +139,26 @@
 			<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
 			<p>Level sampling is a way to choose which mipmap level to use when fetching a texture, based on how much a pixel covers in texture space. I implemented it by calculating the level of detail (LOD) for each pixel and then selecting the appropriate mipmap: L_ZERO always uses the base texture, while L_NEAREST picks the closest mipmap level based on the LOD. This works together with pixel sampling, so each pixel can use nearest or bilinear interpolation at that mipmap level. The tradeoffs are straightforward: L_ZERO with pixel sampling is fastest but can produce aliasing on minified textures, while L_NEAREST reduces aliasing at the cost of extra memory and some computation. Bilinear sampling smooths colors but is slower than nearest, and supersampling increases quality further but is very memory-intensive. I rendered four versions of my texture using the combinations of L_ZERO + P_NEAREST, L_ZERO + P_LINEAR, L_NEAREST + P_NEAREST, and L_NEAREST + P_LINEAR. The results clearly show that using L_NEAREST reduces aliasing for distant or small textures, and combining it with bilinear sampling produces the smoothest and most visually appealing result.</p>
 
+			<div class="image-grid">
+				<figure>
+					<img src="screenshot_2-18_22-36-53.png" alt="L_ZERO P_NEAREST" />
+					<figcaption>L_ZERO and P_NEAREST</figcaption>
+				</figure>
+				<figure>
+					<img src="screenshot_2-18_22-37-45.png" alt="L_ZERO P_LINEAR" />
+					<figcaption>L_ZERO and P_LINEAR</figcaption>
+				</figure>
+			</div>
+			<div class="image-grid">
+				<figure>
+					<img src="screenshot_2-18_22-39-50.png" alt="L_NEAREST P_NEAREST" />
+					<figcaption>L_NEAREST and P_NEAREST</figcaption>
+				</figure>
+				<figure>
+					<img src="screenshot_2-18_22-38-43.png" alt="L_NEAREST P_LINEAR" />
+					<figcaption>L_NEAREST and P_LINEAR</figcaption>
+				</figure>
+			</div>
 		</div>
 	</body>
 </html>
