@@ -1,27 +1,25 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 		<style>
-			h1 {
-				text-align: center;
+			h1 { text-align: center; }
+			.container { margin: 0 auto; padding: 60px 20%; }
+			figure { text-align: center; margin: 20px 0; }
+			img { display: inline-block; max-width: 100%; height: auto; }
+			body { font-family: 'Inter', sans-serif; line-height: 1.6; }
+			
+			/* Style for Task 2 image grid */
+			.image-grid {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+				gap: 10px;
 			}
-
-			.container {
-				margin: 0 auto;
-				padding: 60px 20%;
-			}
-
-			figure {
-				text-align: center;
-			}
-
-			img {
-				display: inline-block;
-			}
-
-			body {
-				font-family: 'Inter', sans-serif;
+			.image-grid figure {
+				flex: 1 1 30%; /* Three images per row */
+				min-width: 250px;
 			}
 		</style>
 	</head>
@@ -32,54 +30,53 @@
 
 			<br>
 
-			Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-			
+			Link to webpage: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 			<br>
-
-			Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+			Link to GitHub repository: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 
 			<figure>
 				<img src="lion.jpg" alt="Lion" style="width:50%"/>
-				<figcaption>You can add images with captions!</figcaption>
+				<figcaption>Example lion image</figcaption>
 			</figure>
 
 			<h2>Overview</h2>
-			Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+			<p>Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.</p>
 
 			<h2>Task 1: Drawing Single-Color Triangles</h2>
 			<p>To rasterize triangles we first want to find the bounding points of the triangles that we want to sample inside. To do this we get the maximum and minimum of both the x and y points for all 3 given points. After, we want to define the 3 Lines (L(x,y)) that actually make up the triangle so we can use the three Lines Test to properly rasterize our triangles. We can find L(x,y) = Ax + By + C and solve for A, B and C with some math from the points that have been given to us. Then we can iterate through all the points inside of our bounding points and see if the center of each pixel falls inside our triangle. If it does then we can color it in and if not we don’t.</p>
 			<p>It is no worse as we are pretty much doing the same type of sampling inside the bounding of the triangle.</p>
 
+			<figure>
+				<img src="screenshot_2-14_10-18-53.png" alt="Task 1 Screenshot" style="width:80%"/>
+				<figcaption>Rasterization of basic/test4.svg with the pixel inspector centered on the tip of a thin triangle, showing aliasing at 1 sample per pixel.</figcaption>
+			</figure>
+
 			<h2>Task 2: Antialiasing by Supersampling</h2>
 			<p>For the SuperSampling implementation, the main change that I did was account for sampling each pixel multiple times instead of just sampling the pixel at the center every time. I updated the buffer data structure to include the sample rate when being used to account for more values and hence get better definition when displaying the images at a higher sampling rate. The x and y values are the main things that changed when actually doing the rasterizing apart from updating the actual buffer. We include two loops based on the sampling size (N being defined as the square root of the sampling rate) with the x and y values increasing at increments of 1 over the square root of the sample rate, hence covering much more points than before.</p>
 			<p>This process is very memory intensive but as we are covering more space we see in the pictures below, as we supersample more the edges are more defined and are not crooked/shaking anymore and it becomes more of a straight line. The effect is most noticeable from 1 sample to 4 samples, but still a very minor improvement from 4 samples to 16 samples. I personally would supersample at 4 per pixel as it gives the best balance between memory and actual output image wise.</p>
+
+			<div class="image-grid">
+				<figure>
+					<img src="screenshot_2-14_10-16-56.png" alt="Supersampling 1x" />
+					<figcaption>Supersampling: 1 sample per pixel (default).</figcaption>
+				</figure>
+				<figure>
+					<img src="screenshot_2-14_10-17-9.png" alt="Supersampling 4x" />
+					<figcaption>Supersampling: 4 samples per pixel.</figcaption>
+				</figure>
+				<figure>
+					<img src="screenshot_2-14_10-17-15.png" alt="Supersampling 16x" />
+					<figcaption>Supersampling: 16 samples per pixel.</figcaption>
+				</figure>
+			</div>
 
 			<h2>Task 3: Transforms</h2>
 			<p>In this image the robot will be waving his hand at the user while jumping.</p>
 
 			<h2>Task 4: Barycentric coordinates</h2>
 			<p>Barycentric Interpolation is based on using the points color at 3 points of the triangle and in a way combining them to form a new color value inside the triangle based on its position. We do this by calculating alpha, beta and gamma which are derived from the area of the triangle as well as the dx,dy of the lines of the triangle. We use these derived values to interpolate the colors in this equation:</p>
-			<p>\( \text{color} = \alpha \cdot \text{color1} + \beta \cdot \text{color2} + \gamma \cdot \text{color3} \)</p>
+			<p>$$ \text{color} = \alpha \cdot \text{color1} + \beta \cdot \text{color2} + \gamma \cdot \text{color3} $$</p>
 
-			<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-			<p>(Write-up content goes here)</p>
-
-			<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-			<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-			<h2>Additional Notes (please remove)</h2>
-			<ul>
-				<li>You can also add code if you'd like as so: <code>code code code</code></li>
-				<li>If you'd like to add math equations, 
-					<ul>
-						<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-						<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-					</ul>
-				</li>
-			</ul>
-		</div>
+			</div>
 	</body>
 </html>
