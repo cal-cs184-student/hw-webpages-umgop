@@ -94,6 +94,14 @@
                 <figcaption>Modified robot.svg with the cubeman in a waving and jumping pose.</figcaption>
             </figure>
 
+            <h3>Extra Credit: Viewport Rotation</h3>
+            <p>I implemented interactive viewport rotation allowing the user to rotate the entire view using the <strong>R</strong> key (counter-clockwise 15°) and <strong>T</strong> key (clockwise 15°). The rotation is applied to the SVG-to-NDC transformation matrix, allowing users to inspect drawings from any angle. Pressing <strong>Space</strong> resets the rotation along with other view transforms.</p>
+
+            <figure>
+                <img src="screenshot_2-18_23-42-39.png" alt="Rotated Viewport" />
+                <figcaption>Viewport rotated by 45° (3 presses of R) showing the texture-mapped quad from a tilted angle.</figcaption>
+            </figure>
+
             <h2>Task 4: Barycentric coordinates</h2>
             <p>Baycentric Interpolation is based on using the points color at 3 points of the triangle and in a way combining them to form a new color value inside the triangle based on its position. Given a triangle with vertices \(V_0, V_1, V_2\), any point \(P\) can be written as \(P = \alpha \cdot V_0 + \beta \cdot V_1 + \gamma \cdot V_2\) where \(\alpha + \beta + \gamma = 1\). Each weight represents how "close" the point is to the corresponding vertex (a point at \(V_0\) has \(\alpha=1, \beta=0, \gamma=0\); the centroid has all weights equal to \(\frac{1}{3}\)). We do this by calculating alpha, beta and gamma which are derived from the area of the triangle as well as the dx,dy of the lines of the triangle. We use these derived values to interpolate the colors in this equation alpha * color1 + beta * color2 + gamma * color3. The point lies inside the triangle if and only if all three weights are non-negative.</p>
 
