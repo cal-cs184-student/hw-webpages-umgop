@@ -51,7 +51,7 @@
             <div style="text-align: center;">
                 Link to webpage: <a href="https://cs184.eecs.berkeley.edu/sp26">cs184.eecs.berkeley.edu/sp26</a>
                 <br>
-                Link to GitHub repository: <a href="https://cs184.eecs.berkeley.edu/sp26">cs184.eecs.berkeley.edu/sp26</a>
+                Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw1-rasterizer-umesh">https://github.com/cal-cs184-student/hw1-rasterizer-umesh</a>
             </div>
 
             <h2>Overview</h2>
@@ -131,7 +131,7 @@
                     <figcaption>Bilinear sampling at 16 samples per pixel.</figcaption>
                 </figure>
             </div>
-            <p>Bilinear sampling at 1 sample per pixel is cleaner, less jaggy, and looks more coherent compared to nearest at 1 sample. At 16 samples per pixel, bilinear achieves a better and clearer result, though bilinear does heavily improve the rendering of nearest as well. The biggest difference between nearest and bilinear shows up on high-frequency textures or magnified areas, where nearest can look blocky and bilinear keeps edges smooth. When the texture is viewed at roughly 1:1 scale, the two methods produce nearly identical results since sample points land close to texel centers.</p>
+            <p>Bilinear sampling at 1 sample per pixel is cleaner, less jaggy, and looks more coherent compared to nearest at 1 sample. At 16 samples per pixel, bilinear achieves a better and clearer result, though supersampling does heavily improve the rendering of nearest as well. The biggest difference between nearest and bilinear shows up on high-frequency textures or magnified areas, where nearest can look blocky and bilinear keeps edges smooth. When the texture is viewed at roughly 1:1 scale, the two methods produce nearly identical results since sample points land close to texel centers.</p>
 
             <h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
             <p>Level sampling is a way to choose which mipmap level to use when fetching a texture, based on how much a pixel covers in texture space. I implemented it by calculating how much \((u,v)\) changes when moving one pixel in x and y (the screen-space UV derivatives), scaling by the texture dimensions, and computing the level as \(D = \log_2(\max(L_x, L_y))\). I then select the appropriate mipmap: L_ZERO always uses the base texture, L_NEAREST picks the closest mipmap level (rounding D), and L_LINEAR interpolates between the two adjacent levels. This works together with pixel sampling, so each pixel can use nearest or bilinear interpolation at that mipmap level.</p>
