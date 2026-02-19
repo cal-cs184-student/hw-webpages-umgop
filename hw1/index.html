@@ -4,213 +4,138 @@
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 		<style>
-			body {
-				font-family: 'Inter', sans-serif;
-				line-height: 1.6;
-				color: #333;
-				background-color: #fff;
+			h1 {
+				text-align: center;
 			}
 
 			.container {
 				margin: 0 auto;
-				padding: 60px 15%;
-			}
-
-			h1, h2, h3 {
-				color: #1a1a1a;
-			}
-
-			h1 {
-				text-align: center;
-				border-bottom: 2px solid #eee;
-				padding-bottom: 20px;
-			}
-
-			h2 {
-				margin-top: 40px;
-				border-left: 5px solid #0055ff;
-				padding-left: 15px;
-			}
-
-			p {
-				margin-bottom: 20px;
+				padding: 60px 20%;
 			}
 
 			figure {
 				text-align: center;
-				margin: 30px 0;
 			}
 
 			img {
 				display: inline-block;
 				max-width: 100%;
-				height: auto;
-				border: 1px solid #ddd;
-				border-radius: 8px;
-				box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 			}
 
-			figcaption {
-				font-style: italic;
-				font-size: 0.9em;
-				color: #666;
-				margin-top: 10px;
+			body {
+				font-family: 'Inter', sans-serif;
 			}
 
-			/* Task Comparison Grids */
 			.image-grid {
 				display: flex;
 				flex-wrap: wrap;
-				justify-content: space-between;
-				gap: 20px;
-				margin: 20px 0;
+				justify-content: center;
+				gap: 10px;
 			}
 
 			.image-grid figure {
-				flex: 1 1 45%;
-				min-width: 300px;
-				margin: 0;
-			}
-
-			.image-grid-3 figure {
-				flex: 1 1 30%;
+				flex: 1;
 				min-width: 250px;
-				margin: 0;
-			}
-
-			code {
-				background-color: #f4f4f4;
-				padding: 2px 5px;
-				border-radius: 4px;
-				font-family: monospace;
-			}
-
-			a {
-				color: #0055ff;
-				text-decoration: none;
-			}
-
-			a:hover {
-				text-decoration: underline;
 			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
 			<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-			<div style="text-align: center; font-weight: 600;">Name: Umesh Gopi</div>
+			<div style="text-align: center;">Names: Umesh Gopi</div>
 
-			<div style="text-align: center; margin-top: 10px;">
-				Link to webpage: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a> | 
-				Link to GitHub: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-			</div>
+			<br>
 
-			<h2>Overview</h2>
-			<p>
-				In this homework, I implemented a basic rasterizer capable of drawing triangles, performing supersampling for antialiasing, applying hierarchical transforms, and mapping textures using various sampling methods. This project provided a hands-on look at the graphics pipeline, from coordinate transformations to the math behind smooth color interpolation and texture filtering.
-			</p>
+			Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+			
+			<br>
 
-			<h2>Task 1: Drawing Single-Color Triangles</h2>
-			<p>
-				To rasterize triangles, we first find the bounding box of the triangle by taking the minimum and maximum of the x and y coordinates of the three vertices. We then define the three line equations $L(x,y) = Ax + By + C$ for each edge. By iterating through every pixel center within the bounding box and performing the Three Line Test, we determine if a point lies inside the triangle. If it does, we color the pixel. This method ensures we only process the pixels that could potentially be inside the triangle, making it as efficient as a standard bounding box sampling approach.
-			</p>
+			Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 
 			<figure>
-				<img src="screenshot_2-14_10-18-53.png" alt="Task 1 Screenshot"/>
-				<figcaption>Rasterization of basic/test4.svg. The pixel inspector shows the aliased (jagged) edge of a thin triangle at 1 sample per pixel.</figcaption>
+				<img src="lion.jpg" alt="Lion" style="width:50%"/>
+				<figcaption>You can add images with captions!</figcaption>
+			</figure>
+
+			<h2>Overview</h2>
+			Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+
+			<h2>Task 1: Drawing Single-Color Triangles</h2>
+			<p>To rasterize triangles we first want to find the bounding points of the triangles that we want to sample inside. To do this we get the maximum and minimum of both the x and y points for all 3 given points. After, we want to define the 3 Lines (L(x,y)) that actually make up the triangle so we can use the three Lines Test to properly rasterize our triangles. We can find L(x,y) = Ax + By + C and solve for A, B and C with some math from the points that have been given to us. Then we can iterate through all the points inside of our bounding points and see if the center of each pixel falls inside our triangle. If it does then we can color it in and if not we don’t.</p>
+			<p>It is no worse as we are pretty much doing the same type of sampling inside the bounding of the triangle.</p>
+
+			<figure>
+				<img src="screenshot_2-14_10-18-53.png" alt="Basic Test 4" />
+				<figcaption>Screenshot of basic/test4.svg with the default viewing parameters and the pixel inspector centered on an interesting part of the scene.</figcaption>
 			</figure>
 
 			<h2>Task 2: Antialiasing by Supersampling</h2>
-			<p>
-				For supersampling, I updated the buffer structure to account for multiple samples per pixel. Instead of sampling just the center, we divide each pixel into a sub-grid based on the sampling rate (e.g., $4 \times 4$ for 16x). We iterate through these sub-pixels, perform the line test, and store the results in a larger sample buffer. Finally, when resolving to the frame buffer, we average the colors of the sub-pixels to determine the final pixel color.
-			</p>
-			<p>
-				This process effectively acts as a low-pass filter. As seen in the images below, increasing the sampling rate significantly reduces the "jaggies" on edges. While 16x sampling provides the best quality, 4x sampling offers a strong balance between visual improvement and memory usage.
-			</p>
+			<p>For the SuperSampling implementation, the main change that I did was account for sampling each pixel multiple times instead of just sampling the pixel at the center every time. I updated the buffer data structure to include the sample rate when being used to account for more values and hence get better definition when displaying the images at a higher sampling rate. The x and y values are the main things that changed when actually doing the rasterizing apart from updating the actual buffer. We include two loops based on the sampling size (N being defined as the square root of the sampling rate) with the x and y values increasing at increments of 1 over the square root of the sample rate, hence covering much more points than before.</p>
+			<p>This process is very memory intensive but as we are covering more space we see in the pictures below, as we supersample more the edges are more defined and are not crooked/shaking anymore and it becomes more of a straight line. The effect is most noticeable from 1 sample to 4 samples, but still a very minor improvement from 4 samples to 16 samples. I personally would supersample at 4 per pixel as it gives the best balance between memory and actual output image wise.</p>
 
-			<div class="image-grid-3">
+			<div class="image-grid">
 				<figure>
-					<img src="screenshot_2-14_10-16-56.png" alt="Supersampling 1x" />
-					<figcaption>1 Sample Per Pixel</figcaption>
+					<img src="screenshot_2-14_10-16-56.png" alt="Supersampling 1" />
+					<figcaption>Supersampling 1 sample per pixel.</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-14_10-17-9.png" alt="Supersampling 4x" />
-					<figcaption>4 Samples Per Pixel</figcaption>
+					<img src="screenshot_2-14_10-17-9.png" alt="Supersampling 4" />
+					<figcaption>Supersampling 4 samples per pixel.</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-14_10-17-15.png" alt="Supersampling 16x" />
-					<figcaption>16 Samples Per Pixel</figcaption>
+					<img src="screenshot_2-14_10-17-15.png" alt="Supersampling 16" />
+					<figcaption>Supersampling 16 samples per pixel.</figcaption>
 				</figure>
 			</div>
 
 			<h2>Task 3: Transforms</h2>
-			<p>
-				I modified the original cubeman to perform a friendly waving motion. To achieve this, I applied specific rotation and translation transformations to the right arm components. I also tilted the torso slightly to make the pose appear more dynamic and "in motion" as if the robot is jumping while waving.
-			</p>
-			
+			<p>In this image the robot will be waving his hand at the user while jumping.</p>
+
 			<figure>
-				<img src="screenshot_2-18_16-10-35.png" alt="Waving Robot" style="width:60%"/>
-				<figcaption>My updated cubeman (my_robot.svg) waving hello.</figcaption>
+				<img src="screenshot_2-18_16-10-35.png" alt="Robot Waving" />
+				<figcaption>Updated version of robot.svg with cubeman waving.</figcaption>
 			</figure>
 
 			<h2>Task 4: Barycentric coordinates</h2>
-			<p>
-				Barycentric coordinates allow us to express any point inside a triangle as a weighted average of its vertices. By calculating $\alpha, \beta, \text{ and } \gamma$ based on the relative distances to the edges, we can interpolate any attribute (like color or texture coordinates) smoothly across the triangle's surface.
-			</p>
-			
-			<p>
-				Using the equation:
-				$$ \text{color} = \alpha \cdot \text{color1} + \beta \cdot \text{color2} + \gamma \cdot \text{color3} $$
-				we can create smooth gradients where the color at any point is a perfect blend of the vertex colors.
-			</p>
+			<p>Baycentric Interpolation is based on using the points color at 3 points of the triangle and in a way combining them to form a new color value inside the triangle based on its position. We do this by calculating alpha, beta and gamma which are derived from the area of the triangle as well as the dx,dy of the lines of the triangle. We use these derived values to interpolate the colors in this equation alpha * color1 + betta * color2 + gamma * color3.</p>
 
 			<div class="image-grid">
 				<figure>
 					<img src="screenshot_2-18_16-22-39.png" alt="Barycentric Triangle" />
-					<figcaption>A single triangle demonstrating smooth color interpolation via barycentric coordinates.</figcaption>
+					<figcaption>Example of a triangle with color interpolation using barycentric coordinates.</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-18_16-24-25.png" alt="Test 7 Color Wheel" />
-					<figcaption>A screenshot of basic/test7.svg showing the color wheel at 1 sample per pixel.</figcaption>
+					<img src="screenshot_2-18_16-24-25.png" alt="Basic Test 7" />
+					<figcaption>Screenshot of basic/test7.svg with default viewing parameters and sample rate 1.</figcaption>
 				</figure>
 			</div>
 
 			<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-			<p>
-				Pixel sampling determines how we fetch colors from a texture map. I implemented this by using barycentric interpolation to find the $(u, v)$ texture coordinates for each pixel. 
-			</p>
-			
-			<p>
-				<b>Nearest Sampling:</b> Picks the single closest texel to the $(u, v)$ coordinate. It's fast but causes "blockiness" when magnified. <br>
-				<b>Bilinear Sampling:</b> Samples the four nearest texels and performs a weighted average based on the distance. This produces a much smoother result.
-			</p>
+			<p>Pixel sampling is how we figure out the color of each pixel when applying a texture to a triangle. I implemented it by first computing the texture coordinates for each pixel using barycentric interpolation, then fetching the color from the texture. In nearest sampling, I simply pick the color of the closest texel, which is fast but can look blocky or jagged, especially on detailed or magnified textures. In bilinear sampling, I take the four nearest texels and average their colors based on distance, which smooths out edges and makes textures look much nicer. I also added supersampling by taking multiple samples per pixel to reduce aliasing. Comparing screenshots, nearest sampling at 1 sample per pixel looks jagged, while increasing to 16 samples improves it slightly. Bilinear sampling at 1 sample per pixel already looks much smoother, and combining it with 16 samples per pixel produces the clearest, smoothest result. The biggest difference between nearest and bilinear shows up on high-frequency textures or magnified areas, where nearest can look blocky and bilinear keeps edges smooth.</p>
 
 			<div class="image-grid">
 				<figure>
-					<img src="screenshot_2-18_17-15-6.png" alt="Nearest 1x" />
-					<figcaption>Nearest Sampling, 1 sample/pixel</figcaption>
+					<img src="screenshot_2-18_17-15-6.png" alt="Nearest 1" />
+					<figcaption>Nearest sampling at 1 sample per pixel.</figcaption>
 				</figure>
 				<figure>
-					<img src="screenshot_2-18_17-15-36.png" alt="Nearest 16x" />
-					<figcaption>Nearest Sampling, 16 samples/pixel</figcaption>
-				</figure>
-				<figure>
-					<img src="screenshot_2-18_17-15-57.png" alt="Bilinear 1x" />
-					<figcaption>Bilinear Sampling, 1 sample/pixel</figcaption>
-				</figure>
-				<figure>
-					<img src="screenshot_2-18_17-16-22.png" alt="Bilinear 16x" />
-					<figcaption>Bilinear Sampling, 16 samples/pixel</figcaption>
+					<img src="screenshot_2-18_17-15-36.png" alt="Nearest 16" />
+					<figcaption>Nearest sampling at 16 samples per pixel.</figcaption>
 				</figure>
 			</div>
-			<p>
-				Bilinear sampling clearly outperforms nearest sampling in areas of high magnification or high-frequency detail, where nearest sampling creates sharp, stair-step artifacts.
-			</p>
+			<div class="image-grid">
+				<figure>
+					<img src="screenshot_2-18_17-15-57.png" alt="Bilinear 1" />
+					<figcaption>Bilinear sampling at 1 sample per pixel.</figcaption>
+				</figure>
+				<figure>
+					<img src="screenshot_2-18_17-16-22.png" alt="Bilinear 16" />
+					<figcaption>Bilinear sampling at 16 samples per pixel.</figcaption>
+				</figure>
+			</div>
 
 			<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-			<p>
-				(TODO: Explain level sampling, mipmap implementation, and the tradeoffs between speed, memory, and antialiasing power.)
-			</p>
+			<p>Level sampling is a way to choose which mipmap level to use when fetching a texture, based on how much a pixel covers in texture space. I implemented it by calculating the level of detail (LOD) for each pixel and then selecting the appropriate mipmap: L_ZERO always uses the base texture, while L_NEAREST picks the closest mipmap level based on the LOD. This works together with pixel sampling, so each pixel can use nearest or bilinear interpolation at that mipmap level. The tradeoffs are straightforward: L_ZERO with pixel sampling is fastest but can produce aliasing on minified textures, while L_NEAREST reduces aliasing at the cost of extra memory and some computation. Bilinear sampling smooths colors but is slower than nearest, and supersampling increases quality further but is very memory-intensive. I rendered four versions of my texture using the combinations of L_ZERO + P_NEAREST, L_ZERO + P_LINEAR, L_NEAREST + P_NEAREST, and L_NEAREST + P_LINEAR. The results clearly show that using L_NEAREST reduces aliasing for distant or small textures, and combining it with bilinear sampling produces the smoothest and most visually appealing result.</p>
 
 		</div>
 	</body>
