@@ -110,28 +110,28 @@
 
             <h2>Task 5: "Pixel sampling" for texture mapping</h2>
             <p>Pixel sampling is how we figure out the color of each pixel when applying a texture to a triangle. I implemented it by first computing the texture coordinates (using barycentric interpolation of the per-vertex UV values) for each pixel, then fetching the color from the texture. In nearest sampling, I simply pick the color of the closest texel, which is fast but can look blocky or jagged, especially on detailed or magnified textures. In bilinear sampling, I take the four nearest texels and average their colors based on distance (weighted as \((1-s)(1-t) \cdot c_{00} + s(1-t) \cdot c_{10} + (1-s)t \cdot c_{01} + st \cdot c_{11}\), where \(s,t\) are the fractional distances from the sample point to the nearest texel center), which smooths out edges and makes textures look much nicer.</p>
-            <p>Comparing screenshots, nearest sampling at 1 sample per pixel looks jagged, while increasing to 16 samples improves it slightly. Bilinear sampling at 1 sample per pixel already looks much smoother, and combining it with 16 samples per pixel produces the clearest, smoothest result. The biggest difference between nearest and bilinear shows up on high-frequency textures or magnified areas, where nearest can look blocky and bilinear keeps edges smooth. When the texture is viewed at roughly 1:1 scale, the two methods produce nearly identical results since sample points land close to texel centers.</p>
 
             <div class="image-grid">
                 <figure>
-                    <img src="screenshot_2-18_23-17-9.png" alt="Nearest 1x" />
+                    <img src="screenshot_2-18_23-24-37.png" alt="Nearest 1x" />
                     <figcaption>Nearest sampling at 1 sample per pixel.</figcaption>
                 </figure>
                 <figure>
-                    <img src="screenshot_2-18_23-17-29.png" alt="Nearest 16x" />
+                    <img src="screenshot_2-18_23-24-40.png" alt="Nearest 16x" />
                     <figcaption>Nearest sampling at 16 samples per pixel.</figcaption>
                 </figure>
             </div>
             <div class="image-grid">
                 <figure>
-                    <img src="screenshot_2-18_23-17-52.png" alt="Bilinear 1x" />
+                    <img src="screenshot_2-18_23-25-0.png" alt="Bilinear 1x" />
                     <figcaption>Bilinear sampling at 1 sample per pixel.</figcaption>
                 </figure>
                 <figure>
-                    <img src="screenshot_2-18_23-17-57.png" alt="Bilinear 16x" />
+                    <img src="screenshot_2-18_23-24-44.png" alt="Bilinear 16x" />
                     <figcaption>Bilinear sampling at 16 samples per pixel.</figcaption>
                 </figure>
             </div>
+            <p>Bilinear sampling at 1 sample per pixel is cleaner, less jaggy, and looks more coherent compared to nearest at 1 sample. At 16 samples per pixel, bilinear achieves a better and clearer result, though bilinear does heavily improve the rendering of nearest as well. The biggest difference between nearest and bilinear shows up on high-frequency textures or magnified areas, where nearest can look blocky and bilinear keeps edges smooth. When the texture is viewed at roughly 1:1 scale, the two methods produce nearly identical results since sample points land close to texel centers.</p>
 
             <h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
             <p>Level sampling is a way to choose which mipmap level to use when fetching a texture, based on how much a pixel covers in texture space. I implemented it by calculating how much \((u,v)\) changes when moving one pixel in x and y (the screen-space UV derivatives), scaling by the texture dimensions, and computing the level as \(D = \log_2(\max(L_x, L_y))\). I then select the appropriate mipmap: L_ZERO always uses the base texture, L_NEAREST picks the closest mipmap level (rounding D), and L_LINEAR interpolates between the two adjacent levels. This works together with pixel sampling, so each pixel can use nearest or bilinear interpolation at that mipmap level.</p>
