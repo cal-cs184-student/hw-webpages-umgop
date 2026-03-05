@@ -49,106 +49,106 @@
 	</head>
 	<body>
 		<div class="container">
-		<h1>CS184/284A Spring 2025 Homework 2 Write-Up</h1>
-		<div style="text-align: center;">Names: (Your Names Here)</div>
+		<h1>CS184/284A Spring 2026 Homework 2 Write-Up</h1>
+		<div style="text-align: center;">Names: (Your Name Here)</div>
 
 		<br>
 
-		Link to webpage: <a href="TODO">Link to your GitHub Pages</a>
+		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-umgop/hw2/index.html">https://cal-cs184-student.github.io/hw-webpages-umgop/hw2/index.html</a>
 
 		<br>
 		
-		Link to GitHub repository: <a href="TODO">Link to your private repository</a>
+		Link to GitHub repository: <a href="https://cs184.eecs.berkeley.edu/sp26/">https://cs184.eecs.berkeley.edu/sp26/</a>
 
 		<figure>
 			<img src="teapot.png" alt="Teapot" style="width:50%"/>
-			<figcaption>Initial Teapot Rendering</figcaption>
+			<figcaption>The Classic Teapot</figcaption>
 		</figure>
 
 		<h2>Overview</h2>
-		<p>In this homework, I implemented a series of geometric modeling tools ranging from Bezier curves to complex mesh operations using the Half-Edge data structure. I built a system that can evaluate smooth curves and surfaces, compute area-weighted vertex normals for better shading, and perform local mesh operations like edge flips and splits. Finally, I implemented Loop Subdivision, which allows for smooth mesh upsampling. Through this process, I learned the importance of pointer management in mesh data structures and how local geometric operations can be combined to create complex surface smoothing algorithms.</p>
+		<p>In this homework, I built a system to evaluate smooth surfaces and manipulate triangle meshes using the half-edge data structure. I started by using de Casteljau’s algorithm and linear interpolation to calculate points on curves and 3D Bezier surfaces. From there, I moved into mesh editing, implementing area-weighted vertex normals for smooth shading and creating operations like edge flips and edge splits to change the mesh connectivity. Finally, I combined these techniques to implement Loop Subdivision, which uses weighted averages and mesh upsampling to turn blocky shapes into smooth, high-resolution models.</p>
 
 		<h2>Section I: Bezier Curves and Surfaces</h2>
 
-		<h3>Part 1: Bezier curves with 1D de Casteljau recursive subdivision</h3>
+		<h3>Part 1: Bezier Curves using De Casteljau Recursive Method</h3>
 		<p>De Casteljau’s algorithm is a way of calculating points on a smooth curve by using linear interpolation. The idea behind this method is to pick points on lines connecting the points on the curve, depending on a value called t, which varies from 0 to 1. After choosing points on the lines, we connect them and repeat the same process until we have only one point left. This one point represents the exact position of the curve for a certain value of t. This was achieved by creating a function that calculates points on the curve one level at a time until the curve has been fully evaluated.</p>
 
 		<div class="image-grid">
 			<figure>
 				<img src="first.png" width="400px"/>
-				<figcaption>Step 1</figcaption>
+				<figcaption>Step 1: Initial interpolation</figcaption>
 			</figure>
 			<figure>
 				<img src="second.png" width="400px"/>
-				<figcaption>Step 2</figcaption>
+				<figcaption>Step 2: Intermediate level</figcaption>
 			</figure>
 			<figure>
 				<img src="third.png" width="400px"/>
-				<figcaption>Step 3</figcaption>
+				<figcaption>Step 3: Approaching the curve</figcaption>
 			</figure>
 			<figure>
 				<img src="fourth.png" width="400px"/>
-				<figcaption>Step 4</figcaption>
+				<figcaption>Step 4: Final evaluated point</figcaption>
 			</figure>
 		</div>
 
-		<h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
+		<h3>Part 2: Bezier Surfaces using Separable 1D De Casteljau</h3>
 		<p>For the 3D surfaces, I decided to extend the 1D curve logic to two dimensions. This was achieved by considering the 3D grid of points as rows and applying the 1D curve logic to each row, depending on a horizontal parameter called u. This gave us points on a single vertical curve. I then ran the 1D algorithm one last time on that new vertical curve using a second parameter called v. The final point from that last step is a point on the 3D Bezier surface. My implementation simply reuses the 1D evaluation logic to handle this row-by-row and then column-by-column approach.</p>
 		
 		<figure>
 			<img src="fifth.png" width="800px"/>
-			<figcaption>Bezier Surface Evaluation</figcaption>
+			<figcaption>Bezier Surface (teapot.bez)</figcaption>
 		</figure>
 
 		<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
 
-		<h3>Part 3: Area-weighted vertex normals</h3>
+		<h3>Part 3: Area Weighted Vertex Normals</h3>
 		<p>To obtain the smooth shading (Phong shading), I have used the concept of area-weighted vertex normals. Instead of the triangle looking flat, we want the corners of the triangle to have an orientation that averages out the triangles adjacent to it. Using the data structure of the half-edge, I have traversed the vertex so that all the triangles adjacent to the vertex are covered. I have then obtained the vector perpendicular to the surface of the triangle using the cross product. Since the magnitude of this vector is proportional to the area of the triangle, the larger triangles will have more weight. I have then summed all these vectors and normalized the resultant vector to one.</p>
 
 		<div class="image-grid">
 			<figure>
 				<img src="sixth.png" width="400px"/>
-				<figcaption>Flat Shading</figcaption>
+				<figcaption>Vertex Normals Off (Flat Shading)</figcaption>
 			</figure>
 			<figure>
 				<img src="seventh.png" width="400px"/>
-				<figcaption>Smooth Shading (Phong)</figcaption>
+				<figcaption>Vertex Normals On (Phong Shading)</figcaption>
 			</figure>
 		</div>
 
-		<h3>Part 4: Edge flip</h3>
+		<h3>Part 4: Edge Flip Implementation</h3>
 		<p>The edge flip operation involves taking the common edge of the two triangles and flipping it so that it joins the other two opposite corners. In order to implement this, I have had to be extremely careful with the mesh data structure. I have identified all the components of the operation, including the corners, the common edge, and the half-edges that connect these components. A great trick I used was drawing a "before and after" diagram on paper; if even one pointer is wrong, the mesh can disappear or turn black because the computer can't figure out which way the surface is facing.</p>
 
 		<div class="image-grid">
 			<figure>
 				<img src="eigth.png" width="400px"/>
-				<figcaption>Before Edge Flip</figcaption>
+				<figcaption>Teapot before edge flips</figcaption>
 			</figure>
 			<figure>
 				<img src="ninth.png" width="400px"/>
-				<figcaption>After Edge Flip</figcaption>
+				<figcaption>Teapot after several edge flips</figcaption>
 			</figure>
 		</div>
 
-		<h3>Part 5: Edge split</h3>
+		<h3>Part 5: Edge Split Implementation</h3>
 		<p>When implementing edge splitting, it meant that an edge is taken and a new vertex is added exactly in the middle of it, and this vertex is connected to both opposite corners. This increases the number of triangles by two. This was a bit more involved than flipping because I had to create entirely new mesh components such as a vertex, three edges, and two faces. This involved implementing it by adding a new vertex exactly at the middle of an edge and adding new edges and faces to fill up the gaps. The challenge involved making sure that every single half edge, including the existing ones, has their "next" and "twin" pointers updated appropriately to include the new smaller triangles.</p>
 
 		<div class="image-grid">
 			<figure>
 				<img src="tenth.png" width="300px"/>
-				<figcaption>Initial Mesh</figcaption>
+				<figcaption>Original Mesh</figcaption>
 			</figure>
 			<figure>
 				<img src="eleventh.png" width="300px"/>
-				<figcaption>After Several Splits</figcaption>
+				<figcaption>Mesh after several edge splits</figcaption>
 			</figure>
 			<figure>
 				<img src="twelfth.png" width="300px"/>
-				<figcaption>Splits and Flips Combined</figcaption>
+				<figcaption>Mesh after a mix of splits and flips</figcaption>
 			</figure>
 		</div>
 
-		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
+		<h3>Part 6: Loop Subdivision for Mesh Upsampling</h3>
 		<p>Loop subdivision is used to make a blocky mesh look smoother by adding more triangles and moving the vertices appropriately. This involved implementing it by a few steps. First, it involved calculating the new positions of existing vertices and midpoints by using a weighted average of their neighbors. Second, I split every edge in the mesh and flipped the specific new edges that connected an old vertex to a new one. Finally, I moved all the points to the smooth positions I calculated at the start.</p>
 
 		<p><b>Observations:</b> After subdivision, sharp corners and edges tend to get rounded off. This happens because the weighted average pulls corner points toward their neighbors. To keep an edge sharp, you can "pre-split" edges near that corner to create more local points, which keeps the average closer to the original shape.</p>
@@ -158,15 +158,15 @@
 		<div class="image-grid">
 			<figure>
 				<img src="13.png" width="400px"/>
-				<figcaption>Cube Step 1</figcaption>
+				<figcaption>Asymmetric subdivision on a basic cube</figcaption>
 			</figure>
 			<figure>
 				<img src="14.png" width="400px"/>
-				<figcaption>Cube Step 2</figcaption>
+				<figcaption>Symmetric subdivision after pre-processing</figcaption>
 			</figure>
 			<figure>
 				<img src="15.png" width="400px"/>
-				<figcaption>Subdivision Progress</figcaption>
+				<figcaption>Final smoothed cube</figcaption>
 			</figure>
 		</div>
 		</div>
