@@ -151,6 +151,26 @@
 		<h3>Part 6: Loop Subdivision for Mesh Upsampling</h3>
 		<p>Loop subdivision is used to make a blocky mesh look smoother by adding more triangles and moving the vertices appropriately. This involved implementing it by a few steps. First, it involved calculating the new positions of existing vertices and midpoints by using a weighted average of their neighbors. Second, I split every edge in the mesh and flipped the specific new edges that connected an old vertex to a new one. Finally, I moved all the points to the smooth positions I calculated at the start.</p>
 
+        <p>Below is the loop subdivision process applied to the teapot mesh, showing how it becomes progressively smoother with each iteration:</p>
+		<div class="image-grid">
+			<figure>
+				<img src="20.png" width="230px"/>
+				<figcaption>Teapot: Level 0</figcaption>
+			</figure>
+			<figure>
+				<img src="21.png" width="230px"/>
+				<figcaption>Teapot: Level 1</figcaption>
+			</figure>
+			<figure>
+				<img src="22.png" width="230px"/>
+				<figcaption>Teapot: Level 2</figcaption>
+			</figure>
+			<figure>
+				<img src="23.png" width="230px"/>
+				<figcaption>Teapot: Level 3</figcaption>
+			</figure>
+		</div>
+
 		<p><b>Observations:</b> After subdivision, sharp corners and edges tend to get rounded off. This happens because the weighted average pulls corner points toward their neighbors. To keep an edge sharp, you can "pre-split" edges near that corner to create more local points, which keeps the average closer to the original shape.</p>
 
 		<p><b>The Symmetric Cube:</b> A standard cube often subdivides asymmetrically because the triangles on its faces aren't balanced. To fix this, I pre-processed the cube by splitting the diagonal edge on every face to create an "X" shape. This makes the triangles perfectly symmetrical, so the cube smooths out evenly into a sphere-like shape instead of a lopsided one.</p>
