@@ -171,6 +171,18 @@
 			</figure>
 		</div>
 
+        <p>I also tested the upsampling on more complex models like the cow and the quadball. As shown below, the subdivision effectively smooths out the coarse triangle edges into organic, rounded surfaces.</p>
+        <div class="image-grid">
+			<figure>
+				<img src="cow.png" width="400px"/>
+				<figcaption>Smooth Cow Mesh</figcaption>
+			</figure>
+			<figure>
+				<img src="quadball.png" width="400px"/>
+				<figcaption>Smooth Quadball Mesh</figcaption>
+			</figure>
+		</div>
+
 		<p><b>Observations:</b> After subdivision, sharp corners and edges tend to get rounded off. This happens because the weighted average pulls corner points toward their neighbors. To keep an edge sharp, you can "pre-split" edges near that corner to create more local points, which keeps the average closer to the original shape.</p>
 
 		<p><b>The Symmetric Cube:</b> A standard cube often subdivides asymmetrically because the triangles on its faces aren't balanced. To fix this, I pre-processed the cube by splitting the diagonal edge on every face to create an "X" shape. This makes the triangles perfectly symmetrical, so the cube smooths out evenly into a sphere-like shape instead of a lopsided one.</p>
