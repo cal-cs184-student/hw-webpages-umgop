@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 		<style>
 			h1 {
@@ -45,374 +46,161 @@
 				gap: 10px;
 			}
 		</style>
-		<script>
-		  MathJax = {
-		    tex: {
-		      inlineMath: [['$', '$'], ['\\(', '\\)']]
-		    }
-		  };
-		</script>
-		<script id="MathJax-script" async
-		  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-		</script>
 	</head>
 	<body>
 		<div class="container">
-		<h1>CS184/284A Spring 2026 Homework 3 Write-Up</h1>
+		<h1>CS184/284A Spring 2026 Homework 2 Write-Up</h1>
 		<div style="text-align: center;">Names: Umesh Gopi</div>
 
 		<br>
 
-		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-umgop/">https://cal-cs184-student.github.io/hw-webpages-umgop/</a>
+		Link to webpage: <a href="https://cs184.eecs.berkeley.edu/sp26/">https://cs184.eecs.berkeley.edu/sp26/</a>
 
 		<br>
+		
+		Link to GitHub repository: <a href="https://cal-cs184-student.github.io/hw-webpages-umgop/hw2/index.html">https://cal-cs184-student.github.io/hw-webpages-umgop/hw2/index.html</a>
 
-		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw-webpages-umgop">https://github.com/cal-cs184-student/hw-webpages-umgop</a>
-
-		<h2>Overview</h2>
-		<p>In this project, I have developed a physically based renderer from scratch, enhancing a basic ray-primitive intersection engine to a high-performance path tracing engine. This was achieved through a series of steps: starting with an image space to world space ray generation, followed by a Bounding Volume Hierarchy with a centroid-based splitting strategy to achieve O(log n) complexity in complex scenes. However, this is not enough in a physically accurate renderer; hence, I have also included direct illumination using hemisphere and importance sampling, followed by global illumination using recursive path tracing and Russian Roulette termination to achieve realistic light bounces and color bleeding effects. To enhance this engine's performance, I have also included an adaptive sampling approach, where statistics are used to determine sample distribution. The biggest learning experience while developing this engine as a whole was that photorealism is ultimately a form of massive Monte Carlo integration, where beauty is really a matter of statistics. The biggest thrill in this learning experience was to see how noise in initial renderings gives way to realistic gradient effects.</p>
-
-		<h2>Part 1: Ray Generation and Scene Intersection</h2>
-		<p>The rendering pipeline is essentially a series of coordinate transformations that we perform. We start out going from image space to camera space, starting out with a pixel (x,y). Then we're normalizing that, so it goes from 0 to 1, and then we're projecting it onto a virtual sensor plane located at Z = -1 in camera space. This is done by scaling it by the dimensions of our sensor, which is determined by our horizontal and vertical fields of view:</p>
-		<p style="text-align: center;"><code>Xcam = (2x - 1) * tan(hFov/2)</code></p>
-		<p style="text-align: center;"><code>Ycam = (2y - 1) * tan(vFov/2)</code></p>
-		<p>After we get the vector for the camera space we want to convert it to world space. In camera space, the camera is at (0, 0, 0) looking toward -Z. To move this into an actual scene we multiply the camera vector (xcam, ycam, -1) by the Camera to World (c2w) matrix. The ray's origin in world space is simply the camera's position. Once we have a ray in world space, we now check the ray against every triangle or sphere. If the ray hits anything within its valid range [min_t, max_t] we record the intersection, update the ray's t to the hit distance (so we don't look at things further away), and eventually calculate the color based on the surface properties.</p>
-
-		<p>For triangle intersection we use the Moller-Trumbore algorithm which simultaneously computes the ray-plane intersection and the barycentric coordinates. We first compute two edge vectors from the triangle vertices, then use cross products and dot products to solve for the parameter t along the ray and the barycentric coordinates (b1, b2). If t falls within the ray's valid range and the barycentric coordinates are all non-negative (with b1 + b2 &le; 1), we have a valid intersection. The surface normal at the hit point is interpolated from the vertex normals using the barycentric coordinates.</p>
-
-		<div class="image-grid">
-			<figure>
-				<img src="./banana.png" width="300px"/>
-				<figcaption>banana.dae</figcaption>
-			</figure>
-			<figure>
-				<img src="./CBempty.png" width="300px"/>
-				<figcaption>CBempty.dae</figcaption>
-			</figure>
-			<figure>
-				<img src="./CBspheres.png" width="300px"/>
-				<figcaption>CBspheres.dae</figcaption>
-			</figure>
-			<figure>
-				<img src="./cube.png" width="300px"/>
-				<figcaption>cube.dae</figcaption>
-			</figure>
-			<figure>
-				<img src="./plane.png" width="300px"/>
-				<figcaption>plane.dae</figcaption>
-			</figure>
-			<figure>
-				<img src="./cow.png" width="300px"/>
-				<figcaption>cow.dae</figcaption>
-			</figure>
-		</div>
-
-		<h2>Part 2: Bounding Volume Hierarchy</h2>
-		<p>Our BVH building algorithm arranges scene primitives in a binary tree structure using a recursive top-down approach. Every time the function is called recursively, we first identify a full bounding box that contains every scene primitive within a specified range of the recursion tree. The recursion tree is stopped by creating a leaf node that directly references the primitives when the number of primitives is determined to be less than or equal to the max_leaf_size value. If not, we split the current bounding box along its longest axis to preserve "square" volume shapes and minimize child volume overlap within the tree structure. We have chosen to use the average of the centroids of all primitives along a given axis for the split heuristic value. We then use the std::partition function to efficiently reorder the primitives in memory according to the split value before recursively building the BVH tree for both child nodes. The BVH building algorithm fundamentally alters the traditional rendering approach by eliminating a linear O(n) search for intersecting rays and instead utilizing a much more efficient logarithmic O(log n) search approach.</p>
-
-		<div class="image-grid">
-			<figure>
-				<img src="./lucy.png" width="400px"/>
-				<figcaption>CBlucy.dae</figcaption>
-			</figure>
-			<figure>
-				<img src="./firstdragon.png" width="400px"/>
-				<figcaption>dragon.dae</figcaption>
-			</figure>
-			<figure>
-				<img src="./maxplanck.png" width="400px"/>
-				<figcaption>maxplanck.dae</figcaption>
-			</figure>
-		</div>
-
-		<p>The difference between brute-force and BVH-accelerated rendering is dramatic. Without BVH, every ray must test against every primitive in the scene, resulting in rendering times that scale linearly with scene complexity. With BVH, rays traverse a logarithmic tree structure and skip vast regions of the scene, reducing intersection tests per ray from thousands down to single digits. The table below compares both approaches across scenes of increasing complexity:</p>
-
-		<table style="width:100%; border-collapse: collapse; text-align: center; margin: 20px 0;">
-		  <tr style="background-color: #f2f2f2;">
-		    <th style="padding: 8px; border: 1px solid #ddd;">Scene</th>
-		    <th style="padding: 8px; border: 1px solid #ddd;">Primitives</th>
-		    <th style="padding: 8px; border: 1px solid #ddd;">Without BVH</th>
-		    <th style="padding: 8px; border: 1px solid #ddd;">With BVH</th>
-		    <th style="padding: 8px; border: 1px solid #ddd;">Avg Tests/Ray (BVH)</th>
-		  </tr>
-		  <tr>
-		    <td style="padding: 8px; border: 1px solid #ddd;">cow.dae</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">5,856</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">~5.0 s</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">0.0907 s</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">3.42</td>
-		  </tr>
-		  <tr>
-		    <td style="padding: 8px; border: 1px solid #ddd;">beetle.dae</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">7,558</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">~7.0 s</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">0.0506 s</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">1.75</td>
-		  </tr>
-		  <tr>
-		    <td style="padding: 8px; border: 1px solid #ddd;">CBlucy.dae</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">133,784</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">Infeasible</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">0.0771 s</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">3.32</td>
-		  </tr>
-		</table>
-
-		<p>For the cow mesh with 5,856 triangles, rendering dropped from roughly 5 seconds without BVH to 0.09 seconds with it — a ~55x speedup. The beetle at 7,558 primitives saw a similar improvement, going from ~7 seconds to 0.05 seconds with only 1.75 intersection tests per ray on average. The most striking case is CBlucy with 133,784 triangles: without BVH, rendering this scene is simply infeasible in any reasonable timeframe, yet with BVH it completes in just 0.08 seconds with 3.32 tests per ray. The BVH reduces the per-ray work from O(n) to O(log n), making complex scenes practical to render.</p>
-
-		<h2>Part 3: Direct Illumination</h2>
-		<p>In the uniform hemisphere sampling implementation, we estimate direct lighting by generating random rays across the hemisphere above a hit point and checking if they intersect an emissive surface. For each sample, we evaluate the reflection equation by multiplying the light's emission by the surface BSDF and a cosine term, then normalizing the result by the constant probability density function of $1/2\pi$ and the total number of samples. Conversely, the importance light sampling implementation iterates through each light source in the scene and samples directions pointing directly toward them. This method utilizes shadow rays with a restricted maximum distance to detect occluding geometry; if the path to the light is clear, we calculate the radiance using the light-specific PDF and BSDF.</p>
-
-		<p>After zero-bounce illumination:</p>
 		<figure>
-			<img src="./CBbunny_16_8.png" width="400px"/>
-			<figcaption>CBbunny.dae (zero-bounce, 16 samples, 8 light rays)</figcaption>
+			<img src="teapot.png" alt="Teapot" style="width:50%"/>
+			<figcaption>The Classic Teapot</figcaption>
 		</figure>
 
-		<div class="image-grid">
-			<figure>
-				<img src="./spheres_hemisphere.png" width="400px"/>
-				<figcaption>CBspheres_lambertian.dae (hemisphere)</figcaption>
-			</figure>
-			<figure>
-				<img src="./spheres_importance.png" width="400px"/>
-				<figcaption>CBspheres_lambertian.dae (importance)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_hemisphere.png" width="400px"/>
-				<figcaption>CBbunny.dae (hemisphere)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_importance.png" width="400px"/>
-				<figcaption>CBbunny.dae (importance)</figcaption>
-			</figure>
-		</div>
+		<h2>Overview</h2>
+		<p>In this homework, I built a system to evaluate smooth surfaces and manipulate triangle meshes using the half-edge data structure. I started by using de Casteljau’s algorithm and linear interpolation to calculate points on curves and 3D Bezier surfaces. From there, I moved into mesh editing, implementing area-weighted vertex normals for smooth shading and creating operations like edge flips and edge splits to change the mesh connectivity. Finally, I combined these techniques to implement Loop Subdivision, which uses weighted averages and mesh upsampling to turn blocky shapes into smooth, high-resolution models.</p>
+
+		<h2>Section I: Bezier Curves and Surfaces</h2>
+
+		<h3>Part 1: Bezier Curves using De Casteljau Recursive Method</h3>
+		<p>De Casteljau’s algorithm is a way of calculating points on a smooth curve by using linear interpolation. The idea behind this method is to pick points on lines connecting the points on the curve, depending on a value called t, which varies from 0 to 1. After choosing points on the lines, we connect them and repeat the same process until we have only one point left. This one point represents the exact position of the curve for a certain value of t. This was achieved by creating a function that calculates points on the curve one level at a time until the curve has been fully evaluated.</p>
 
 		<div class="image-grid">
 			<figure>
-				<img src="./bunny_l1.png" width="200px"/>
-				<figcaption>1 Light Ray (CBbunny.dae)</figcaption>
+				<img src="first.png" width="400px"/>
+				<figcaption>Step 1: Initial interpolation</figcaption>
 			</figure>
 			<figure>
-				<img src="./bunny_l4.png" width="200px"/>
-				<figcaption>4 Light Rays (CBbunny.dae)</figcaption>
+				<img src="second.png" width="400px"/>
+				<figcaption>Step 2: Intermediate level</figcaption>
 			</figure>
 			<figure>
-				<img src="./bunny_l16.png" width="200px"/>
-				<figcaption>16 Light Rays (CBbunny.dae)</figcaption>
+				<img src="third.png" width="400px"/>
+				<figcaption>Step 3: Approaching the curve</figcaption>
 			</figure>
 			<figure>
-				<img src="./bunny_l64.png" width="200px"/>
-				<figcaption>64 Light Rays (CBbunny.dae)</figcaption>
+				<img src="fourth.png" width="400px"/>
+				<figcaption>Step 4: Final evaluated point</figcaption>
 			</figure>
 		</div>
 
-		<p>When analyzing noise levels in soft shadows using importance sampling with one sample per pixel, the visual quality improves significantly as the number of light rays increases from 1 to 64. At $l=1$, the shadows appear as a grainy, dithered collection of black and white dots because each pixel has only a single chance to "see" the light source. As the light samples increase to 4 and 16, the edges of the shadows begin to resolve into a recognizable penumbra, though visible noise persists. At $l=64$, the shadows become much smoother and reach a high-fidelity gradient that accurately represents the area light's coverage.</p>
+		<h3>Part 2: Bezier Surfaces using Separable 1D De Casteljau</h3>
+		<p>For the 3D surfaces, I decided to extend the 1D curve logic to two dimensions. This was achieved by considering the 3D grid of points as rows and applying the 1D curve logic to each row, depending on a horizontal parameter called u. This gave us points on a single vertical curve. I then ran the 1D algorithm one last time on that new vertical curve using a second parameter called v. The final point from that last step is a point on the 3D Bezier surface. My implementation simply reuses the 1D evaluation logic to handle this row-by-row and then column-by-column approach.</p>
+		
+		<figure>
+			<img src="fifth.png" width="800px"/>
+			<figcaption>Bezier Surface (teapot.bez)</figcaption>
+		</figure>
 
-		<p>Comparing the two methods reveals that importance light sampling is far more efficient than uniform hemisphere sampling because it avoids wasting rays on dark directions that contribute no light to the scene. Uniform hemisphere sampling results in high-variance "salt-and-pepper" noise because random rays frequently miss small or distant light sources, whereas importance sampling targets emitters directly to ensure every non-occluded ray provides useful radiance data. Consequently, importance sampling produces much cleaner images at lower sample counts and is the only method capable of rendering point lights, which have zero probability of being hit by a random hemisphere ray.</p>
+		<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
 
-		<h2>Part 4: Global Illumination</h2>
-		<p>To perform recursive global illumination, we have added direct lighting and incorporated the at_least_one_bounce_radiance function to perform recursive sampling of BSDFs and tracing of rays. The implementation details include: (1) initializing the rays at the camera with depth = max_ray_depth and decrementing it in each bounce, (2) accumulating one-bounce radiance if isAccumBounces is true, and (3) using Russian Roulette termination with a continuation probability of 0.7 after the first bounce to obtain unbiased results. The results show that indirect lighting captures important phenomena such as color bleeding and soft shadows not captured in direct-only rendered images. The progression of m=0 to m=5 shows how the image is progressively refined in each recursive bounce, with the second and third bounces having the most impact on the visual quality of the image. The comparison of the rendered image with and without accumulation shows how lower-order bounces contribute to the final image, and how Russian Roulette termination at high max depths produces almost identical results to depth-limited termination at a fraction of the cost.</p>
+		<h3>Part 3: Area Weighted Vertex Normals</h3>
+		<p>To obtain the smooth shading (Phong shading), I have used the concept of area-weighted vertex normals. Instead of the triangle looking flat, we want the corners of the triangle to have an orientation that averages out the triangles adjacent to it. Using the data structure of the half-edge, I have traversed the vertex so that all the triangles adjacent to the vertex are covered. I have then obtained the vector perpendicular to the surface of the triangle using the cross product. Since the magnitude of this vector is proportional to the area of the triangle, the larger triangles will have more weight. I have then summed all these vectors and normalized the resultant vector to one.</p>
 
 		<div class="image-grid">
 			<figure>
-				<img src="./bunny_accum_m5.png" width="400px"/>
-				<figcaption>CBbunny.dae (1024 spp, m=5)</figcaption>
+				<img src="sixth.png" width="400px"/>
+				<figcaption>Vertex Normals Off (Flat Shading)</figcaption>
 			</figure>
 			<figure>
-				<img src="./spheres_global.png" width="400px"/>
-				<figcaption>CBspheres_lambertian.dae (1024 spp)</figcaption>
+				<img src="seventh.png" width="400px"/>
+				<figcaption>Vertex Normals On (Phong Shading)</figcaption>
 			</figure>
 		</div>
+
+		<h3>Part 4: Edge Flip Implementation</h3>
+		<p>The edge flip operation involves taking the common edge of the two triangles and flipping it so that it joins the other two opposite corners. In order to implement this, I have had to be extremely careful with the mesh data structure. I have identified all the components of the operation, including the corners, the common edge, and the half-edges that connect these components. A great trick I used was drawing a "before and after" diagram on paper; if even one pointer is wrong, the mesh can disappear or turn black because the computer can't figure out which way the surface is facing.</p>
 
 		<div class="image-grid">
 			<figure>
-				<img src="./bunny_direct_only.png" width="400px"/>
-				<figcaption>Only direct illumination (CBbunny.dae)</figcaption>
+				<img src="eigth.png" width="400px"/>
+				<figcaption>Teapot before edge flips</figcaption>
 			</figure>
 			<figure>
-				<img src="./bunny_indirect_only.png" width="400px"/>
-				<figcaption>Only indirect illumination (CBbunny.dae)</figcaption>
+				<img src="ninth.png" width="400px"/>
+				<figcaption>Teapot after several edge flips</figcaption>
 			</figure>
 		</div>
+
+		<h3>Part 5: Edge Split Implementation</h3>
+		<p>When implementing edge splitting, it meant that an edge is taken and a new vertex is added exactly in the middle of it, and this vertex is connected to both opposite corners. This increases the number of triangles by two. This was a bit more involved than flipping because I had to create entirely new mesh components such as a vertex, three edges, and two faces. This involved implementing it by adding a new vertex exactly at the middle of an edge and adding new edges and faces to fill up the gaps. The challenge involved making sure that every single half edge, including the existing ones, has their "next" and "twin" pointers updated appropriately to include the new smaller triangles.</p>
 
 		<div class="image-grid">
 			<figure>
-				<img src="./bunny_unaccum_m0.png" width="400px"/>
-				<figcaption>max_ray_depth = 0 (unaccumulated)</figcaption>
+				<img src="tenth.png" width="300px"/>
+				<figcaption>Original Mesh</figcaption>
 			</figure>
 			<figure>
-				<img src="./bunny_unaccum_m1.png" width="400px"/>
-				<figcaption>max_ray_depth = 1 (unaccumulated)</figcaption>
+				<img src="eleventh.png" width="300px"/>
+				<figcaption>Mesh after several edge splits</figcaption>
 			</figure>
 			<figure>
-				<img src="./bunny_unaccum_m2.png" width="400px"/>
-				<figcaption>max_ray_depth = 2 (unaccumulated)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_unaccum_m3.png" width="400px"/>
-				<figcaption>max_ray_depth = 3 (unaccumulated)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_unaccum_m4.png" width="400px"/>
-				<figcaption>max_ray_depth = 4 (unaccumulated)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_unaccum_m5.png" width="400px"/>
-				<figcaption>max_ray_depth = 5 (unaccumulated)</figcaption>
+				<img src="twelfth.png" width="300px"/>
+				<figcaption>Mesh after a mix of splits and flips</figcaption>
 			</figure>
 		</div>
+
+		<h3>Part 6: Loop Subdivision for Mesh Upsampling</h3>
+		<p>Loop subdivision is used to make a blocky mesh look smoother by adding more triangles and moving the vertices appropriately. This involved implementing it by a few steps. First, it involved calculating the new positions of existing vertices and midpoints by using a weighted average of their neighbors. Second, I split every edge in the mesh and flipped the specific new edges that connected an old vertex to a new one. Finally, I moved all the points to the smooth positions I calculated at the start.</p>
+
+        <p>Below is the loop subdivision process applied to the teapot mesh, showing how it becomes progressively smoother with each iteration:</p>
+		<div class="image-grid">
+			<figure>
+				<img src="20.png" width="230px"/>
+				<figcaption>Teapot: Level 0</figcaption>
+			</figure>
+			<figure>
+				<img src="21.png" width="230px"/>
+				<figcaption>Teapot: Level 1</figcaption>
+			</figure>
+			<figure>
+				<img src="22.png" width="230px"/>
+				<figcaption>Teapot: Level 2</figcaption>
+			</figure>
+			<figure>
+				<img src="23.png" width="230px"/>
+				<figcaption>Teapot: Level 3</figcaption>
+			</figure>
+		</div>
+
+        <p>I also tested the upsampling on more complex models like the cow and the quadball. As shown below, the subdivision effectively smooths out the coarse triangle edges into organic, rounded surfaces.</p>
+        <div class="image-grid">
+			<figure>
+				<img src="cow.png" width="400px"/>
+				<figcaption>Smooth Cow Mesh</figcaption>
+			</figure>
+			<figure>
+				<img src="quadball.png" width="400px"/>
+				<figcaption>Smooth Quadball Mesh</figcaption>
+			</figure>
+		</div>
+
+		<p><b>Observations:</b> After subdivision, sharp corners and edges tend to get rounded off. This happens because the weighted average pulls corner points toward their neighbors. To keep an edge sharp, you can "pre-split" edges near that corner to create more local points, which keeps the average closer to the original shape.</p>
+
+		<p><b>The Symmetric Cube:</b> A standard cube often subdivides asymmetrically because the triangles on its faces aren't balanced. To fix this, I pre-processed the cube by splitting the diagonal edge on every face to create an "X" shape. This makes the triangles perfectly symmetrical, so the cube smooths out evenly into a sphere-like shape instead of a lopsided one.</p>
 
 		<div class="image-grid">
 			<figure>
-				<img src="./bunny_accum_m0.png" width="400px"/>
-				<figcaption>max_ray_depth = 0 (accumulated)</figcaption>
+				<img src="13.png" width="400px"/>
+				<figcaption>Asymmetric subdivision on a basic cube</figcaption>
 			</figure>
 			<figure>
-				<img src="./bunny_accum_m1.png" width="400px"/>
-				<figcaption>max_ray_depth = 1 (accumulated)</figcaption>
+				<img src="14.png" width="400px"/>
+				<figcaption>Symmetric subdivision after pre-processing</figcaption>
 			</figure>
 			<figure>
-				<img src="./bunny_accum_m2.png" width="400px"/>
-				<figcaption>max_ray_depth = 2 (accumulated)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_accum_m3.png" width="400px"/>
-				<figcaption>max_ray_depth = 3 (accumulated)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_accum_m4.png" width="400px"/>
-				<figcaption>max_ray_depth = 4 (accumulated)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_accum_m5.png" width="400px"/>
-				<figcaption>max_ray_depth = 5 (accumulated)</figcaption>
+				<img src="15.png" width="400px"/>
+				<figcaption>Final smoothed cube</figcaption>
 			</figure>
 		</div>
-
-		<div class="image-grid">
-			<figure>
-				<img src="./bunny_accum_m0.png" width="400px"/>
-				<figcaption>max_ray_depth = 0</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_accum_m1.png" width="400px"/>
-				<figcaption>max_ray_depth = 1</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_accum_m2.png" width="400px"/>
-				<figcaption>max_ray_depth = 2</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_accum_m3.png" width="400px"/>
-				<figcaption>max_ray_depth = 3</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_accum_m4.png" width="400px"/>
-				<figcaption>max_ray_depth = 4</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_rr_m100.png" width="400px"/>
-				<figcaption>max_ray_depth = 100</figcaption>
-			</figure>
-		</div>
-
-		<div class="image-grid">
-			<figure>
-				<img src="./bunny_s1.png" width="400px"/>
-				<figcaption>1 sample per pixel (CBbunny.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_s2.png" width="400px"/>
-				<figcaption>2 samples per pixel (CBbunny.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_s4.png" width="400px"/>
-				<figcaption>4 samples per pixel (CBbunny.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_s8.png" width="400px"/>
-				<figcaption>8 samples per pixel (CBbunny.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_s16.png" width="400px"/>
-				<figcaption>16 samples per pixel (CBbunny.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_s64.png" width="400px"/>
-				<figcaption>64 samples per pixel (CBbunny.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_s1024.png" width="400px"/>
-				<figcaption>1024 samples per pixel (CBbunny.dae)</figcaption>
-			</figure>
-		</div>
-
-		<h2>Part 5: Adaptive Sampling</h2>
-		<p>Adaptive sampling avoids using a fixed high number of samples for every pixel by detecting convergence per-pixel using statistics. As we trace samples through a pixel, we track running sums $s_1 = \sum x_k$ and $s_2 = \sum x_k^2$ of sample illuminances. Every samplesPerBatch (64) samples, we compute the mean $\mu = s_1 / n$, variance $\sigma^2 = \frac{1}{n-1}(s_2 - s_1^2 / n)$, and the convergence metric $I = 1.96 \cdot \sigma / \sqrt{n}$. If $I \leq \text{maxTolerance} \cdot \mu$, the pixel has converged with 95% confidence and we stop sampling early. This concentrates computation on difficult pixels (edges, shadows, indirect lighting) while saving work on simple regions (flat walls, ceilings). In our implementation, we modified raytrace_pixel to accumulate s1 and s2 inside the existing sample loop, check convergence every samplesPerBatch iterations, break early if converged, and store the actual sample count n into sampleCountBuffer for the rate image.</p>
-
-		<p>Rendered scenes (2048 max samples per pixel, 1 light ray, max ray depth 5, adaptive batch 64, tolerance 0.05):</p>
-
-		<div class="image-grid">
-			<figure>
-				<img src="./bunny_adaptive.png" width="400px"/>
-				<figcaption>Rendered image (CBbunny.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./bunny_adaptive_rate.png" width="400px"/>
-				<figcaption>Sample rate image (CBbunny.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./spheres_adaptive.png" width="400px"/>
-				<figcaption>Rendered image (CBspheres_lambertian.dae)</figcaption>
-			</figure>
-			<figure>
-				<img src="./spheres_adaptive_rate.png" width="400px"/>
-				<figcaption>Sample rate image (CBspheres_lambertian.dae)</figcaption>
-			</figure>
-		</div>
-
-		<p>In the rate images, blue indicates low sampling rates (pixels that converged quickly, such as flat walls and ceilings) and red indicates high sampling rates (pixels that required more samples, such as edges, shadow boundaries, and areas with complex indirect lighting).</p>
-
-		<h2>Part 6: Extra Credit — Iterative BVH Traversal</h2>
-
-		<h3>Approach</h3>
-		<p>Each version now uses a while loop with a manual stack instead of recursion for BVH hits. Hitting every node once meant another function call before. That call added memory pressure from stored values like return points and locals. Deeper trees magnify this cost quickly. Scenes with many shapes make it worse fast.</p>
-
-		<h3>Specifics of Implementation</h3>
-		<p>A single file holds everything, no external dependencies needed. Code compiles cleanly at maximum warning levels across compilers, without relying on special flags or nonstandard extensions. Strict conformance ensures portability and long-term maintainability.</p>
-		<p>Working through the tree step by step makes sense once you see the pattern. Start by placing the top node into the stack. Then keep going - pull a node out, check if its box meets the ray. Depending on that result, put both offspring onto the stack or examine items at the bottom level. If an intersection shows up during checks, stop everything and send back true without delay. While gathering hits in full traversal mode, collect only the nearest contact across every endpoint reached. Pushing the left branch later ensures it gets pulled earlier, changing processing order just enough.</p>
-
-		<table style="width:100%; border-collapse: collapse; text-align: center; margin: 20px 0;">
-		  <tr style="background-color: #f2f2f2;">
-		    <th style="padding: 8px; border: 1px solid #ddd;">Scene</th>
-		    <th style="padding: 8px; border: 1px solid #ddd;">Primitives</th>
-		    <th style="padding: 8px; border: 1px solid #ddd;">Recursive (M rays/sec)</th>
-		    <th style="padding: 8px; border: 1px solid #ddd;">Iterative (M rays/sec)</th>
-		    <th style="padding: 8px; border: 1px solid #ddd;">Speedup</th>
-		  </tr>
-		  <tr>
-		    <td style="padding: 8px; border: 1px solid #ddd;">CBbunny.dae</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">33,522</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">2.92</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">3.18</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;"><b>+8.9%</b></td>
-		  </tr>
-		  <tr>
-		    <td style="padding: 8px; border: 1px solid #ddd;">CBdragon.dae</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">100,012</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">3.11</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;">3.83</td>
-		    <td style="padding: 8px; border: 1px solid #ddd;"><b>+23.2%</b></td>
-		  </tr>
-		</table>
-
-		<p>With CBdragon's complex setup - 100K primitives and a deep BVH - the performance gain stands out clearly because recursive methods drag down processing more when nesting runs deeper. In contrast, the basic layout of CBbunny shows smaller improvements due to its shallow tree structure where recursion adds little burden compared to overall workload. Tweaks applied include</p>
-		<p>Fewer memory trips happen since the array lives right where the thread runs. Instead of scattering pieces like std::deque, it sits whole and ready. Efficiency slips in by staying put.</p>
-		<p>Skipping recursion means fewer function calls. Without it, there is no need to manage stack frames. That saves space and time during execution. Handling returns becomes simpler too. Register backups are avoided as a result. Less work happens behind the scenes.</p>
-		<p>That tiny array holding 64 pointers fits neatly into cache, so it gets used over and over right where it sits. Unlike those deep piles of recursive function calls piling up elsewhere.</p>
-		<p>Identical pictures come out because the step-by-step method hits each node in the BVH one after another, doing matching checks every time. Same path, same math, same result - nothing shifts along the way.</p>
-
 		</div>
 	</body>
 </html>
