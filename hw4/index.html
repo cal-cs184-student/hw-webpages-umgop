@@ -23,7 +23,7 @@
 		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-umgop/">https://cal-cs184-student.github.io/hw-webpages-umgop/</a>
 		<br>
 
-
+	
 		<h2>Overview</h2>
 		<p>In this homework I implemented a real-time cloth simulation using a mass-spring system. I built the cloth mesh with point masses and springs (structural, shearing, bending), simulated physics via Verlet integration with external and spring forces, handled collisions with spheres and planes, implemented self-collision using spatial hashing, and wrote several GLSL shaders including diffuse, Blinn-Phong, texture mapping, bump mapping, displacement mapping, mirror reflection, and a custom toon/cel shader.</p>
 
@@ -53,6 +53,7 @@
 		  </tr>
 		</table>
 
+	
 		<h2>Part 2: Simulation via Numerical Integration</h2>
 
 		<h3>Effect of Spring Constant (ks)</h3>
@@ -84,7 +85,7 @@
 		  </tr>
 		</table>
 
-
+	
 		<h2>Part 3: Handling Collisions with Other Objects</h2>
 
 		<h3>Sphere Collisions (scene/sphere.json)</h3>
@@ -109,7 +110,7 @@
 		  </tr>
 		</table>
 
-
+		
 		<h2>Part 4: Handling Self-Collisions</h2>
 
 		<h3>Implementation</h3>
@@ -222,10 +223,12 @@
 
 		<h3>Texture Mapping (Custom Texture)</h3>
 		<p>Texture mapping shader using a custom texture (modified textures in /textures/):</p>
-		<figure>
-			<img src="./p24_img3.png" style="width:60%"/>
-			<figcaption>Custom texture on cloth</figcaption>
-		</figure>
+		<table>
+		  <tr>
+			<td><img src="./p32_img1.png" width="400px"/><figcaption>Custom texture on cloth</figcaption></td>
+			<td><img src="./p32_img2.png" width="400px"/><figcaption>Custom texture on sphere</figcaption></td>
+		  </tr>
+		</table>
 
 		<h3>Bump Mapping</h3>
 		<p>Bump mapping on the cloth and on the sphere:</p>
@@ -253,12 +256,8 @@
 		<p><strong>Bump mapping:</strong></p>
 		<table>
 		  <tr>
-			<td><img src="./p32_img1.png" width="400px"/><figcaption>Bump &mdash; cloth (default)</figcaption></td>
-			<td><img src="./p32_img2.png" width="400px"/><figcaption>Bump &mdash; sphere (default)</figcaption></td>
-		  </tr>
-		  <tr>
-			<td><img src="./p33_img1.png" width="400px"/><figcaption>Bump &mdash; cloth view 2</figcaption></td>
-			<td><img src="./p33_img2.png" width="400px"/><figcaption>Bump &mdash; sphere view 2</figcaption></td>
+			<td><img src="./p33_img1.png" width="400px"/><figcaption>Bump &mdash; cloth (default)</figcaption></td>
+			<td><img src="./p33_img2.png" width="400px"/><figcaption>Bump &mdash; sphere (default)</figcaption></td>
 		  </tr>
 		</table>
 		<p><strong>Displacement mapping:</strong></p>
@@ -302,7 +301,7 @@
 			<td><img src="./p38_img2.png" width="400px"/><figcaption>Mirror shader (view 2)</figcaption></td>
 		  </tr>
 		  <tr>
-			<td><img src="./p40_img1.png" width="400px"/><figcaption>Mirror shader (view 3)</figcaption></td>
+			<td><img src="./p24_img3.png" width="400px"/><figcaption>Mirror shader (view 3)</figcaption></td>
 		  </tr>
 		</table>
 
@@ -311,9 +310,35 @@
 		<table>
 		  <tr>
 			<td><img src="./p39_img1.png" width="400px"/><figcaption>Custom toon/cel shader (view 1)</figcaption></td>
-			<td><img src="./p40_img2.png" width="400px"/><figcaption>Custom toon/cel shader (view 2)</figcaption></td>
+			<td><img src="./p40_img1.png" width="400px"/><figcaption>Custom toon/cel shader (view 2)</figcaption></td>
+		  </tr>
+		  <tr>
+			<td><img src="./p40_img2.png" width="400px"/><figcaption>Custom toon/cel shader (view 3)</figcaption></td>
 		  </tr>
 		</table>
+
+
+		<h2>Extra Credit: Spatially-Varying Wind Force</h2>
+
+		<p>For extra credit I implemented a spatially-varying wind force that creates dynamic, rippling cloth motion. Instead of a uniform external force, the wind varies across the cloth surface and over time using sinusoidal functions:</p>
+
+		<pre><code>// Wind direction and strength
+Vector3D wind_dir(0.5, 0.0, 1.0);
+double wind_strength = 15.0;
+
+// Per-point-mass spatially-varying gust
+double spatial_noise = sin(2.0 * pm.position.x + wind_time * 3.0) *
+                       cos(1.5 * pm.position.y + wind_time * 2.0);
+double gust = 0.5 + 0.5 * spatial_noise;
+pm.forces += wind_dir * wind_strength * gust * mass;</code></pre>
+
+		<p>The wind force is applied in <code>Cloth::simulate()</code> after the external accelerations (gravity) and before the spring forces. The key features are:</p>
+		<ul>
+			<li><strong>Spatial variation</strong>: The wind strength varies based on each point mass's position, creating localized gusts rather than uniform push. This uses <code>sin(2x + 3t) &times; cos(1.5y + 2t)</code> to produce wave-like patterns across the cloth.</li>
+			<li><strong>Temporal variation</strong>: The phase offsets (<code>wind_time * 3.0</code> and <code>wind_time * 2.0</code>) cause the gust pattern to travel across the cloth over time, producing a natural rippling/flapping effect.</li>
+			<li><strong>Directional</strong>: The wind blows primarily in the +z direction with a slight +x component, pushing the cloth outward and to the side.</li>
+		</ul>
+		<p>The result is that the cloth ripples and billows realistically as if being blown by a gentle breeze, with different parts of the cloth responding differently to the wind at any given moment. This is a significant visual improvement over the static gravity-only simulation.</p>
 
 		</div>
 	</body>
