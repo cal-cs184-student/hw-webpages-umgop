@@ -26,7 +26,7 @@
         <br>
 
         <h2>Overview</h2>
-        <p>In this homework I implemented a real-time cloth simulation using a mass-spring system. I built the cloth mesh with point masses and springs (structural, shearing, bending), simulated physics via Verlet integration with external and spring forces, handled collisions with spheres and planes, implemented self-collision using spatial hashing, and wrote several GLSL shaders including diffuse, Blinn-Phong, texture mapping, bump mapping, displacement mapping, mirror reflection, and a custom toon/cel shader. Perhaps the most fascinating thing I learned during this project was how heavily the illusion of realistic physical materials relies on microscopic parameter tuning—seeing firsthand how slight adjustments to spring stiffness, density, or numerical damping completely transform the macroscopic draping, wrinkling, and folding behavior of the cloth.</p>
+        <p>In this homework I implemented a real-time cloth simulation using a mass-spring system. I built the cloth mesh with point masses and springs (structural, shearing, bending), simulated physics via Verlet integration with external and spring forces, handled collisions with spheres and planes, implemented self-collision using spatial hashing, and wrote several GLSL shaders including diffuse, Blinn-Phong, texture mapping, bump mapping, displacement mapping, mirror reflection, and a custom toon/cel shader. Perhaps the most fascinating thing I learned during this project was how heavily the illusion of realistic physical materials relies on microscopic parameter tuning, seeing firsthand how slight adjustments to spring stiffness, density, or numerical damping completely transform the macroscopic draping, wrinkling, and folding behavior of the cloth.</p>
 
         <h2>Part 1: Masses and Springs</h2>
 
@@ -134,7 +134,7 @@
         <h3>Varying Spring Constant (ks)</h3>
         <p>Increasing the spring constant causes fewer folds because the springs become stiffer and resist bending.</p>
 
-        <p><strong>ks = 500 (low &mdash; many tight folds):</strong></p>
+        <p><strong>ks = 500 (low, many tight folds):</strong></p>
         <table>
           <tr>
             <td><img src="./p20_img2.png" width="400px"/><figcaption>ks = 500 (view 1)</figcaption></td>
@@ -142,7 +142,7 @@
           </tr>
         </table>
 
-        <p><strong>ks = 50000 (high &mdash; larger, wider folds):</strong></p>
+        <p><strong>ks = 50000 (high, larger, wider folds):</strong></p>
         <table>
           <tr>
             <td><img src="./p21_img2.png" width="400px"/><figcaption>ks = 50000 (view 1)</figcaption></td>
@@ -151,9 +151,9 @@
         </table>
 
         <h3>Varying Density</h3>
-        <p>Increasing the density has the opposite effect &mdash; more folds because there is greater tension due to gravity. Lower density produces wider bends, similar to increasing ks.</p>
+        <p>Increasing the density has the opposite effect, more folds because there is greater tension due to gravity. Lower density produces wider bends, similar to increasing ks.</p>
 
-        <p><strong>Density = 1 (low &mdash; wider bends):</strong></p>
+        <p><strong>Density = 1 (low, wider bends):</strong></p>
         <table>
           <tr>
             <td><img src="./p22_img1.png" width="400px"/><figcaption>Density = 1 (view 1)</figcaption></td>
@@ -161,7 +161,7 @@
           </tr>
         </table>
 
-        <p><strong>Density = 1000 (high &mdash; more folds):</strong></p>
+        <p><strong>Density = 1000 (high, more folds):</strong></p>
         <table>
           <tr>
             <td><img src="./p23_img1.png" width="400px"/><figcaption>Density = 1000 (view 1)</figcaption></td>
@@ -172,7 +172,7 @@
         <h2>Part 5: Shaders</h2>
 
         <h3>Shader Program Explanation</h3>
-        <p>A shader program is a set of small programs that run on the GPU in parallel, processing vertices and fragments (pixels) to determine how objects appear on screen. Vertex shaders and fragment shaders work together in a pipeline: the vertex shader runs first, transforming each vertex's 3D position into screen-space coordinates and passing along interpolated data (like normals, UV coordinates, and world-space positions). The fragment shader then runs for every pixel covered by a triangle, using the interpolated values from the vertex shader to compute the final color of that pixel. Together, they create lighting and material effects &mdash; the vertex shader sets up the geometry and per-vertex data, while the fragment shader computes per-pixel lighting, texturing, and shading.</p>
+        <p>A shader program is a set of small programs that run on the GPU in parallel, processing vertices and fragments (pixels) to determine how objects appear on screen. Vertex shaders and fragment shaders work together in a pipeline: the vertex shader runs first, transforming each vertex's 3D position into screen-space coordinates and passing along interpolated data (like normals, UV coordinates, and world-space positions). The fragment shader then runs for every pixel covered by a triangle, using the interpolated values from the vertex shader to compute the final color of that pixel. Together, they create lighting and material effects, the vertex shader sets up the geometry and per-vertex data, while the fragment shader computes per-pixel lighting, texturing, and shading.</p>
 
         <h3>Blinn-Phong Shading Model</h3>
         <p>The Blinn-Phong shading model computes lighting as the sum of three components:</p>
@@ -261,8 +261,8 @@
         <p><strong>Bump mapping:</strong></p>
         <table>
           <tr>
-            <td><img src="./p33_img1.png" width="400px"/><figcaption>Bump &mdash; cloth (default)</figcaption></td>
-            <td><img src="./p33_img2.png" width="400px"/><figcaption>Bump &mdash; sphere (default)</figcaption></td>
+            <td><img src="./p33_img1.png" width="400px"/><figcaption>Bump, cloth (default)</figcaption></td>
+            <td><img src="./p33_img2.png" width="400px"/><figcaption>Bump, sphere (default)</figcaption></td>
           </tr>
         </table>
         <p><strong>Displacement mapping:</strong></p>
@@ -276,24 +276,24 @@
         <h4>Low Resolution: -o 16 -a 16</h4>
         <table>
           <tr>
-            <td><img src="./p35_img1.png" width="400px"/><figcaption>Bump &mdash; cloth (-o 16 -a 16)</figcaption></td>
-            <td><img src="./p35_img2.png" width="400px"/><figcaption>Bump &mdash; sphere (-o 16 -a 16)</figcaption></td>
+            <td><img src="./p35_img1.png" width="400px"/><figcaption>Bump, cloth (-o 16 -a 16)</figcaption></td>
+            <td><img src="./p35_img2.png" width="400px"/><figcaption>Bump, sphere (-o 16 -a 16)</figcaption></td>
           </tr>
           <tr>
-            <td><img src="./p35_img3.png" width="400px"/><figcaption>Displacement &mdash; cloth (-o 16 -a 16)</figcaption></td>
-            <td><img src="./p36_img1.png" width="400px"/><figcaption>Displacement &mdash; sphere (-o 16 -a 16)</figcaption></td>
+            <td><img src="./p35_img3.png" width="400px"/><figcaption>Displacement, cloth (-o 16 -a 16)</figcaption></td>
+            <td><img src="./p36_img1.png" width="400px"/><figcaption>Displacement, sphere (-o 16 -a 16)</figcaption></td>
           </tr>
         </table>
 
         <h4>High Resolution: -o 128 -a 128</h4>
         <table>
           <tr>
-            <td><img src="./p36_img2.png" width="400px"/><figcaption>Bump &mdash; cloth (-o 128 -a 128)</figcaption></td>
-            <td><img src="./p37_img1.png" width="400px"/><figcaption>Bump &mdash; sphere (-o 128 -a 128)</figcaption></td>
+            <td><img src="./p36_img2.png" width="400px"/><figcaption>Bump, cloth (-o 128 -a 128)</figcaption></td>
+            <td><img src="./p37_img1.png" width="400px"/><figcaption>Bump, sphere (-o 128 -a 128)</figcaption></td>
           </tr>
           <tr>
-            <td><img src="./p37_img2.png" width="400px"/><figcaption>Displacement &mdash; cloth (-o 128 -a 128)</figcaption></td>
-            <td><img src="./p38_img1.png" width="400px"/><figcaption>Displacement &mdash; sphere (-o 128 -a 128)</figcaption></td>
+            <td><img src="./p37_img2.png" width="400px"/><figcaption>Displacement, cloth (-o 128 -a 128)</figcaption></td>
+            <td><img src="./p38_img1.png" width="400px"/><figcaption>Displacement, sphere (-o 128 -a 128)</figcaption></td>
           </tr>
         </table>
         <p>With low coarseness (-o 16 -a 16), bump mapping looks nearly the same since it only changes normals, but displacement mapping looks blocky and jagged because there aren't enough vertices to represent the detail. With high coarseness (-o 128 -a 128), displacement mapping looks much smoother and more detailed because there are enough vertices to faithfully represent the height map. Bump mapping looks essentially identical at both resolutions since it doesn't depend on mesh resolution.</p>
@@ -345,13 +345,13 @@ pm.forces += wind_dir * wind_strength * gust * mass;</code></pre>
 
         <h3>2. Box Collision Primitive</h3>
 
-        <p>I added a new 3D collision primitive &mdash; an axis-aligned box (rectangular prism). This required creating new source files (<code>collision/box.h</code> and <code>collision/box.cpp</code>), integrating them into the build system, and adding JSON scene parsing so box objects can be loaded from scene files.</p>
+        <p>I added a new 3D collision primitive, an axis-aligned box (rectangular prism). This required creating new source files (<code>collision/box.h</code> and <code>collision/box.cpp</code>), integrating them into the build system, and adding JSON scene parsing so box objects can be loaded from scene files.</p>
 
         <p>The collision algorithm works as follows:</p>
         <ol>
             <li>Check if the point mass is inside the box's axis-aligned bounding volume.</li>
             <li>If inside, compute the penetration depth to each of the 6 faces (±X, ±Y, ±Z).</li>
-            <li>Find the face with minimum penetration distance &mdash; this is the closest exit face.</li>
+            <li>Find the face with minimum penetration distance, this is the closest exit face.</li>
             <li>Push the point mass out through that face with a surface offset, then apply friction correction (same pattern as the sphere and plane collisions).</li>
         </ol>
 
