@@ -27,7 +27,6 @@
 		<h2>Overview</h2>
 		<p>In this homework I implemented a real-time cloth simulation using a mass-spring system. I built the cloth mesh with point masses and springs (structural, shearing, bending), simulated physics via Verlet integration with external and spring forces, handled collisions with spheres and planes, implemented self-collision using spatial hashing, and wrote several GLSL shaders including diffuse, Blinn-Phong, texture mapping, bump mapping, displacement mapping, mirror reflection, and a custom toon/cel shader.</p>
 
-	
 		<h2>Part 1: Masses and Springs</h2>
 
 		<h3>Cloth Wireframe (scene/pinned2.json)</h3>
@@ -53,7 +52,6 @@
 			<td><img src="./p6_img1.png" width="400px"/><figcaption>All constraints</figcaption></td>
 		  </tr>
 		</table>
-
 
 		<h2>Part 2: Simulation via Numerical Integration</h2>
 
@@ -85,6 +83,7 @@
 			<td><img src="./p12_img1.png" width="400px"/><figcaption>Final resting state (view 2)</figcaption></td>
 		  </tr>
 		</table>
+
 
 		<h2>Part 3: Handling Collisions with Other Objects</h2>
 
@@ -124,7 +123,8 @@
 			<td><img src="./p19_img1.png" width="400px"/><figcaption>Mid self-collision (folding)</figcaption></td>
 		  </tr>
 		  <tr>
-			<td><img src="./p19_img2.png" width="400px"/><figcaption>More restful state (settling)</figcaption></td>
+			<td><img src="./p19_img2.png" width="400px"/><figcaption>Further settling</figcaption></td>
+			<td><img src="./p20_img1.png" width="400px"/><figcaption>More restful state</figcaption></td>
 		  </tr>
 		</table>
 
@@ -134,11 +134,8 @@
 		<p><strong>ks = 500 (low &mdash; many tight folds):</strong></p>
 		<table>
 		  <tr>
-			<td><img src="./p20_img1.png" width="400px"/><figcaption>ks = 500 (early)</figcaption></td>
-			<td><img src="./p20_img2.png" width="400px"/><figcaption>ks = 500 (mid)</figcaption></td>
-		  </tr>
-		  <tr>
-			<td><img src="./p21_img1.png" width="400px"/><figcaption>ks = 500 (end state)</figcaption></td>
+			<td><img src="./p20_img2.png" width="400px"/><figcaption>ks = 500 (view 1)</figcaption></td>
+			<td><img src="./p21_img1.png" width="400px"/><figcaption>ks = 500 (view 2)</figcaption></td>
 		  </tr>
 		</table>
 
@@ -208,10 +205,12 @@
 		</table>
 
 		<h4>Full Blinn-Phong Model</h4>
-		<figure>
-			<img src="./p31_img1.png" style="width:60%"/>
-			<figcaption>Full Blinn-Phong model (all components combined)</figcaption>
-		</figure>
+		<table>
+		  <tr>
+			<td><img src="./p31_img1.png" width="400px"/><figcaption>Full Blinn-Phong (sphere)</figcaption></td>
+			<td><img src="./p31_img2.png" width="400px"/><figcaption>Full Blinn-Phong (cloth on sphere)</figcaption></td>
+		  </tr>
+		</table>
 
 		<h3>Diffuse and Phong Shaders</h3>
 		<table>
@@ -223,12 +222,10 @@
 
 		<h3>Texture Mapping (Custom Texture)</h3>
 		<p>Texture mapping shader using a custom texture (modified textures in /textures/):</p>
-		<table>
-		  <tr>
-			<td><img src="./p24_img3.png" width="400px"/><figcaption>Custom texture on cloth</figcaption></td>
-			<td><img src="./p31_img2.png" width="400px"/><figcaption>Custom texture (view 2)</figcaption></td>
-		  </tr>
-		</table>
+		<figure>
+			<img src="./p24_img3.png" style="width:60%"/>
+			<figcaption>Custom texture on cloth</figcaption>
+		</figure>
 
 		<h3>Bump Mapping</h3>
 		<p>Bump mapping on the cloth and on the sphere:</p>
@@ -304,6 +301,9 @@
 			<td><img src="./p27_img1.png" width="400px"/><figcaption>Mirror shader (cloth and sphere)</figcaption></td>
 			<td><img src="./p38_img2.png" width="400px"/><figcaption>Mirror shader (view 2)</figcaption></td>
 		  </tr>
+		  <tr>
+			<td><img src="./p40_img1.png" width="400px"/><figcaption>Mirror shader (view 3)</figcaption></td>
+		  </tr>
 		</table>
 
 		<h3>Custom Shader</h3>
@@ -311,10 +311,7 @@
 		<table>
 		  <tr>
 			<td><img src="./p39_img1.png" width="400px"/><figcaption>Custom toon/cel shader (view 1)</figcaption></td>
-			<td><img src="./p40_img1.png" width="400px"/><figcaption>Custom toon/cel shader (view 2)</figcaption></td>
-		  </tr>
-		  <tr>
-			<td><img src="./p40_img2.png" width="400px"/><figcaption>Custom toon/cel shader (view 3)</figcaption></td>
+			<td><img src="./p40_img2.png" width="400px"/><figcaption>Custom toon/cel shader (view 2)</figcaption></td>
 		  </tr>
 		</table>
 
