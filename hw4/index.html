@@ -23,7 +23,6 @@
 		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-umgop/">https://cal-cs184-student.github.io/hw-webpages-umgop/</a>
 		<br>
 
-	
 		<h2>Overview</h2>
 		<p>In this homework I implemented a real-time cloth simulation using a mass-spring system. I built the cloth mesh with point masses and springs (structural, shearing, bending), simulated physics via Verlet integration with external and spring forces, handled collisions with spheres and planes, implemented self-collision using spatial hashing, and wrote several GLSL shaders including diffuse, Blinn-Phong, texture mapping, bump mapping, displacement mapping, mirror reflection, and a custom toon/cel shader.</p>
 
@@ -53,7 +52,6 @@
 		  </tr>
 		</table>
 
-	
 		<h2>Part 2: Simulation via Numerical Integration</h2>
 
 		<h3>Effect of Spring Constant (ks)</h3>
@@ -85,7 +83,6 @@
 		  </tr>
 		</table>
 
-	
 		<h2>Part 3: Handling Collisions with Other Objects</h2>
 
 		<h3>Sphere Collisions (scene/sphere.json)</h3>
@@ -110,7 +107,7 @@
 		  </tr>
 		</table>
 
-		
+
 		<h2>Part 4: Handling Self-Collisions</h2>
 
 		<h3>Implementation</h3>
@@ -228,6 +225,9 @@
 			<td><img src="./p32_img1.png" width="400px"/><figcaption>Custom texture on cloth</figcaption></td>
 			<td><img src="./p32_img2.png" width="400px"/><figcaption>Custom texture on sphere</figcaption></td>
 		  </tr>
+		  <tr>
+			<td colspan="2"><img src="./p24_img3.png" width="500px"/><figcaption>Default texture on cloth and sphere</figcaption></td>
+		  </tr>
 		</table>
 
 		<h3>Bump Mapping</h3>
@@ -301,7 +301,7 @@
 			<td><img src="./p38_img2.png" width="400px"/><figcaption>Mirror shader (view 2)</figcaption></td>
 		  </tr>
 		  <tr>
-			<td><img src="./p24_img3.png" width="400px"/><figcaption>Mirror shader (view 3)</figcaption></td>
+			<td><img src="./p39_img1.png" width="400px"/><figcaption>Mirror shader (cloth draped)</figcaption></td>
 		  </tr>
 		</table>
 
@@ -309,16 +309,14 @@
 		<p>My custom shader makes a cel-shading or toon effect. It splits the Blinn-Phong diffuse lighting into four bands to create the flat, cartoon-like shading that is common in cel animation. Instead of a smooth falloff, the specular highlight uses a hard binary threshold for a more stylized look. I added rim lighting based on Fresnel that makes a blue glow around the edges of silhouettes. This is where the surface normal is almost perpendicular to the view direction. The colors change from warm orange in the light to cool blue in the dark. Finally, edges where dot(n, v) &lt; 0.15 are made to look almost black. This makes the object's outline strokes stand out.</p>
 		<table>
 		  <tr>
-			<td><img src="./p39_img1.png" width="400px"/><figcaption>Custom toon/cel shader (view 1)</figcaption></td>
-			<td><img src="./p40_img1.png" width="400px"/><figcaption>Custom toon/cel shader (view 2)</figcaption></td>
-		  </tr>
-		  <tr>
-			<td><img src="./p40_img2.png" width="400px"/><figcaption>Custom toon/cel shader (view 3)</figcaption></td>
+			<td><img src="./p40_img1.png" width="400px"/><figcaption>Custom toon/cel shader (view 1)</figcaption></td>
+			<td><img src="./p40_img2.png" width="400px"/><figcaption>Custom toon/cel shader (view 2)</figcaption></td>
 		  </tr>
 		</table>
 
+		<h2>Extra Credit</h2>
 
-		<h2>Extra Credit: Spatially-Varying Wind Force</h2>
+		<h3>1. Spatially-Varying Wind Force</h3>
 
 		<p>For extra credit I implemented a spatially-varying wind force that creates dynamic, rippling cloth motion. Instead of a uniform external force, the wind varies across the cloth surface and over time using sinusoidal functions:</p>
 
@@ -339,6 +337,40 @@ pm.forces += wind_dir * wind_strength * gust * mass;</code></pre>
 			<li><strong>Directional</strong>: The wind blows primarily in the +z direction with a slight +x component, pushing the cloth outward and to the side.</li>
 		</ul>
 		<p>The result is that the cloth ripples and billows realistically as if being blown by a gentle breeze, with different parts of the cloth responding differently to the wind at any given moment. This is a significant visual improvement over the static gravity-only simulation.</p>
+
+		<h3>2. Box Collision Primitive</h3>
+
+		<p>I added a new 3D collision primitive &mdash; an axis-aligned box (rectangular prism). This required creating new source files (<code>collision/box.h</code> and <code>collision/box.cpp</code>), integrating them into the build system, and adding JSON scene parsing so box objects can be loaded from scene files.</p>
+
+		<p>The collision algorithm works as follows:</p>
+		<ol>
+			<li>Check if the point mass is inside the box's axis-aligned bounding volume.</li>
+			<li>If inside, compute the penetration depth to each of the 6 faces (±X, ±Y, ±Z).</li>
+			<li>Find the face with minimum penetration distance &mdash; this is the closest exit face.</li>
+			<li>Push the point mass out through that face with a surface offset, then apply friction correction (same pattern as the sphere and plane collisions).</li>
+		</ol>
+
+		<pre><code>// Find minimum penetration depth among 6 faces
+double dx_min = pos.x - min_corner.x;
+double dx_max = max_corner.x - pos.x;
+// ... (same for dy, dz)
+
+// Push out through nearest face
+Vector3D tangent_point = pos + normal * (min_dist + SURFACE_OFFSET);
+Vector3D correction = tangent_point - pm.last_position;
+pm.position = pm.last_position + (1.0 - friction) * correction;</code></pre>
+
+		<p>The box also renders as 12 triangles (6 faces &times; 2 triangles each) with proper normals for shading. A new scene file <code>scene/box.json</code> places the box at the center of the simulation space so the cloth falls and drapes over it.</p>
+
+		<p><strong>Box collision results:</strong></p>
+		<table>
+		  <tr>
+			<td><img src="./p41_img1.png" width="400px"/><figcaption>Cloth draped on box (wireframe view)</figcaption></td>
+			<td><img src="./p41_img2.png" width="400px"/><figcaption>Cloth draped on box (shaded view)</figcaption></td>
+		  </tr>
+		</table>
+
+		<p>The box primitive successfully demonstrates the cloth colliding with and draping over a rectangular obstacle, showing that the collision system properly handles complex geometry beyond spheres and planes.
 
 		</div>
 	</body>
